@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>if(location.hash==="#embed")document.documentElement.classList.add("embed")</script>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}html.embed body{background:transparent!important;padding:0!important;overflow:hidden}html.embed .pitch{display:none!important}html.embed .stage{display:block!important}html.embed .device-wrap{margin:0 auto}</style>
+</head>
+<body>
+<title>StormLog Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a short pitch column beside a life-size iPhone running StormLog; stacks pitch-over-phone on narrow screens */
+:root{
+  --stage:#e6eaee; --stage-ink:#14181d; --stage-muted:#56606b;
+  --bg:#f2f2f7; --cell:#ffffff; --label:#000000; --label2:rgba(60,60,67,.62); --label3:rgba(60,60,67,.32);
+  --sep:rgba(60,60,67,.24); --fill:rgba(120,120,128,.12); --fill2:rgba(120,120,128,.2);
+  --tint:#d9780a; --tint-ink:#ffffff; --green:#248a3d; --green-bg:rgba(52,199,89,.16); --amber:#b26a00; --amber-bg:rgba(255,159,10,.18);
+  --red:#d70015; --red-bg:rgba(255,59,48,.14);
+  --bar:rgba(249,249,250,.78); --bar-solid:#f9f9fa; --banner:rgba(250,250,252,.86);
+  --scrim:rgba(0,0,0,.32); --paper:#ffffff; --paper-ink:#111418; --paper-muted:#5d6670; --paper-line:#e2e6ea;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --stage:#0c0e11; --stage-ink:#eef1f4; --stage-muted:#9aa5b0;
+  --bg:#000000; --cell:#1c1c1e; --label:#ffffff; --label2:rgba(235,235,245,.62); --label3:rgba(235,235,245,.3);
+  --sep:rgba(84,84,88,.6); --fill:rgba(120,120,128,.24); --fill2:rgba(120,120,128,.34);
+  --tint:#ff9f0a; --tint-ink:#1a0e00; --green:#30d158; --green-bg:rgba(48,209,88,.18); --amber:#ffd60a; --amber-bg:rgba(255,214,10,.16);
+  --red:#ff453a; --red-bg:rgba(255,69,58,.18);
+  --bar:rgba(22,22,24,.74); --bar-solid:#161618; --banner:rgba(40,40,44,.84); --scrim:rgba(0,0,0,.55); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --stage:#0c0e11; --stage-ink:#eef1f4; --stage-muted:#9aa5b0;
+  --bg:#000000; --cell:#1c1c1e; --label:#ffffff; --label2:rgba(235,235,245,.62); --label3:rgba(235,235,245,.3);
+  --sep:rgba(84,84,88,.6); --fill:rgba(120,120,128,.24); --fill2:rgba(120,120,128,.34);
+  --tint:#ff9f0a; --tint-ink:#1a0e00; --green:#30d158; --green-bg:rgba(48,209,88,.18); --amber:#ffd60a; --amber-bg:rgba(255,214,10,.16);
+  --red:#ff453a; --red-bg:rgba(255,69,58,.18);
+  --bar:rgba(22,22,24,.74); --bar-solid:#161618; --banner:rgba(40,40,44,.84); --scrim:rgba(0,0,0,.55); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--stage);color:var(--stage-ink);font-family:var(--font);font-size:15px;line-height:1.47;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--tint);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- stage ---------- */
+.stage{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,414px);gap:56px;align-items:center}
+@media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr);gap:28px;justify-items:center}}
+.pitch{max-width:440px;display:grid;gap:18px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tint)}
+.pitch h1{margin:0;font-size:clamp(40px,6vw,56px);line-height:1.02;letter-spacing:-.025em;font-weight:700}
+.pitch .lede{margin:0;font-size:19px;line-height:1.42;letter-spacing:-.01em;color:var(--stage-muted)}
+.try{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:t}
+.try li{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;counter-increment:t}
+.try li::before{content:counter(t);width:24px;height:24px;border-radius:50%;background:var(--fill2);display:grid;place-items:center;font-size:13px;font-weight:600}
+.fine{font-size:13px;color:var(--stage-muted);margin:0;max-width:52ch}
+@media (max-width:860px){.pitch{max-width:430px;width:100%}}
+
+/* ---------- device ---------- */
+.device-wrap{width:414px;max-width:100%;min-height:200px;position:relative}
+.device{width:414px;height:868px;border-radius:66px;padding:12px;transform-origin:top left;position:absolute;top:0;left:0;
+  background:linear-gradient(145deg,#9a9da2,#5d6066 40%,#8b8e93 70%,#4b4e53);box-shadow:0 0 0 1.5px #2a2c30 inset,0 40px 80px -30px rgba(0,0,0,.55),0 12px 24px -12px rgba(0,0,0,.35)}
+.device::before{content:"";position:absolute;inset:5px;border-radius:61px;background:#050506}
+.screen{position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--label);isolation:isolate;font-size:17px;line-height:1.29;letter-spacing:-.022em}
+.island{position:absolute;top:11px;left:50%;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000;z-index:60}
+.statusbar{position:absolute;top:0;left:0;right:0;height:54px;display:flex;justify-content:space-between;align-items:center;padding:4px 34px 0 46px;z-index:55;font-weight:600;font-size:16.5px;letter-spacing:-.01em;pointer-events:none}
+.statusbar .icons{display:flex;gap:6px;align-items:center}
+.homebar{position:absolute;bottom:8px;left:50%;width:139px;height:5px;margin-left:-69.5px;border-radius:3px;background:var(--label);z-index:70;pointer-events:none}
+
+/* stack (pushed back when the sheet opens) */
+.stack{position:absolute;inset:0;transform-origin:50% 100%;will-change:transform}
+.page{position:absolute;inset:0;background:var(--bg);will-change:transform}
+.scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;padding:98px 16px 110px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.navbar{position:absolute;top:0;left:0;right:0;height:98px;padding-top:54px;z-index:20;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding-inline:8px}
+.navbar::before{content:"";position:absolute;inset:0;background:var(--bar);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);opacity:0;transition:opacity .2s}
+.navbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:.5px;background:var(--sep);opacity:0;transition:opacity .2s}
+.navbar.scrolled::before,.navbar.scrolled::after{opacity:1}
+.navbar>*{position:relative}
+.nav-title{grid-column:2;font-weight:600;font-size:17px;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.navbar.scrolled .nav-title,.navbar.always .nav-title{opacity:1}
+.navbar.always::before,.navbar.always::after{opacity:1}
+.nav-btn{color:var(--tint);font-size:17px;display:flex;align-items:center;gap:2px;padding:8px;border-radius:8px}
+.nav-btn:active{opacity:.4}
+.large-title{margin:4px 4px 14px;font-size:34px;line-height:1.2;font-weight:700;letter-spacing:-.03em}
+
+/* tab bar */
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:83px;padding-bottom:34px;z-index:30;display:grid;grid-template-columns:1fr 1fr}
+.tabbar::before{content:"";position:absolute;inset:0;background:var(--bar);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--sep)}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:500;letter-spacing:.01em;color:var(--label3)}
+.tab[aria-selected="true"]{color:var(--tint)}
+.tab svg{width:26px;height:26px}
+
+/* content pieces */
+.card{background:var(--cell);border-radius:14px;padding:16px}
+.storm-card h2{margin:0;font-size:22px;line-height:1.15;font-weight:700;letter-spacing:-.025em}
+.storm-card .sub{margin:2px 0 14px;font-size:14px;color:var(--label2);letter-spacing:-.01em}
+.seg{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;background:var(--fill)}
+.seg i{display:block;transition:flex-grow .45s cubic-bezier(.2,.8,.2,1)}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px}
+.legend div{display:grid;gap:0}
+.legend b{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.legend span{font-size:12px;color:var(--label2);letter-spacing:0}
+.section-h{margin:24px 16px 7px;font-size:13px;line-height:1.3;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
+.section-f{margin:7px 16px 0;font-size:13px;line-height:1.35;color:var(--label2);letter-spacing:-.005em}
+.list{background:var(--cell);border-radius:12px;overflow:hidden}
+.cell{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 16px;text-align:left;position:relative;min-height:44px}
+.cell+.cell::before{content:"";position:absolute;top:0;right:0;left:60px;height:.5px;background:var(--sep)}
+.list.plain .cell+.cell::before{left:16px}
+button.cell:active{background:var(--fill2)}
+.cell .t{font-size:17px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .s{font-size:14px;line-height:1.3;color:var(--label2);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .v{color:var(--label2);font-size:17px}
+.chev{color:var(--label3);width:9px;height:15px}
+.dot{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#fff}
+.dot svg{width:18px;height:18px}
+.dot.done{background:var(--green)} .dot.prog{background:#ff9f0a} .dot.none{background:var(--red)} .dot.off{background:var(--fill2);color:var(--label2)}
+.pill{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;letter-spacing:-.005em}
+.pill.done{background:var(--green-bg);color:var(--green)} .pill.prog{background:var(--amber-bg);color:var(--amber)} .pill.none{background:var(--red-bg);color:var(--red)}
+
+/* buttons */
+.btn{width:100%;height:50px;border-radius:14px;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s ease-out,opacity .1s}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn.fill{background:var(--tint);color:var(--tint-ink)}
+.btn.gray{background:var(--fill);color:var(--tint)}
+.btn:disabled{opacity:.35;transform:none;cursor:default}
+
+/* sheet */
+.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;z-index:40;pointer-events:none}
+.scrim.on{pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:782px;z-index:45;background:var(--bg);border-radius:12px 12px 0 0;transform:translateY(800px);will-change:transform;display:flex;flex-direction:column;box-shadow:0 -6px 30px rgba(0,0,0,.12)}
+.sheet-head{flex:none;touch-action:none;padding:6px 8px 0;cursor:grab}
+.grabber{width:36px;height:5px;border-radius:3px;background:var(--label3);margin:0 auto 4px}
+.sheet-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:44px}
+.sheet-bar h3{margin:0;font-size:17px;font-weight:600;grid-column:2}
+.sheet-bar .r{justify-self:end;font-weight:600}
+.sheet-body{flex:1;overflow-y:auto;padding:4px 16px 50px;scrollbar-width:none}
+.sheet-body::-webkit-scrollbar{display:none}
+.site-hero{padding:6px 4px 16px;display:grid;gap:6px}
+.site-hero h2{margin:0;font-size:28px;line-height:1.14;font-weight:700;letter-spacing:-.028em}
+.site-hero p{margin:0;color:var(--label2);font-size:15px;letter-spacing:-.012em}
+.actions{display:grid;gap:10px;margin-top:22px}
+
+/* visit form */
+.timer{display:flex;justify-content:space-between;align-items:baseline;padding:14px 16px;border-radius:12px;background:var(--amber-bg)}
+.timer b{font-size:15px;font-weight:600;color:var(--amber)}
+.timer .mono{font-size:22px;font-weight:600;color:var(--label)}
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.shot{position:relative;aspect-ratio:4/3;border-radius:12px;background:var(--cell);display:grid;place-items:center;gap:4px;overflow:hidden;color:var(--tint);font-size:15px;font-weight:600;transition:transform .1s ease-out}
+.shot:active{transform:scale(.97)}
+.shot svg{width:28px;height:28px}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.shot .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.shot .tag{position:absolute;left:8px;top:8px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff;letter-spacing:.01em}
+.shot:disabled{opacity:.4}
+.switch{position:relative;width:51px;height:31px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:16px;background:var(--fill2);transition:background .25s}
+.switch span::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16);transition:transform .3s cubic-bezier(.3,1.3,.5,1)}
+.switch input:checked+span{background:#34c759}
+.switch input:checked+span::after{transform:translateX(20px)}
+.switch input:focus-visible+span{outline:2px solid var(--tint);outline-offset:2px}
+.stepper{display:flex;background:var(--fill);border-radius:9px;overflow:hidden;flex:none}
+.stepper button{width:47px;height:32px;display:grid;place-items:center;font-size:22px;line-height:1;color:var(--label)}
+.stepper button:active{background:var(--fill2)}
+.stepper button+button{border-left:.5px solid var(--sep)}
+
+/* packet */
+.paper{background:var(--paper);color:var(--paper-ink);border-radius:14px;padding:20px 18px;letter-spacing:-.01em;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.paper .ph{border-bottom:2px solid var(--paper-ink);padding-bottom:10px;display:grid;gap:2px}
+.paper .kicker{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--paper-muted)}
+.paper h2{margin:0;font-size:22px;line-height:1.15;font-weight:700;letter-spacing:-.025em}
+.paper .addr{font-size:13px;color:var(--paper-muted)}
+.paper h4{margin:18px 0 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--paper-muted)}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:12px;font-size:13px}
+.facts dt{font-size:11px;color:var(--paper-muted);text-transform:uppercase;letter-spacing:.06em} .facts dd{margin:0;font-weight:600}
+.rows{display:grid;font-size:13px}
+.rows>div{display:grid;gap:2px;padding:8px 0;border-bottom:1px solid var(--paper-line)}
+.rows .top{display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.rows .meta{color:var(--paper-muted);font-size:12px}
+.wx{display:grid;grid-template-columns:auto auto 1fr auto;gap:4px 10px;font-size:12px;align-items:baseline}
+.wx span{padding:3px 0;border-bottom:1px solid var(--paper-line)}
+.wx .h{color:var(--paper-muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em}
+.thumbs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.thumbs figure{margin:0;font-size:10.5px;line-height:1.35;color:var(--paper-muted)}
+.thumbs img{width:100%;aspect-ratio:4/3;border-radius:6px;display:block;margin-bottom:4px}
+.paper .note{margin:16px 0 0;padding-top:10px;border-top:1px solid var(--paper-line);font-size:11px;line-height:1.4;color:var(--paper-muted)}
+
+/* banner */
+.banner{position:absolute;top:54px;left:10px;right:10px;z-index:58;border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;
+  background:var(--banner);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:0 10px 30px rgba(0,0,0,.18);transform:translateY(-160px);will-change:transform}
+.banner .ico{width:38px;height:38px;border-radius:9px;background:var(--tint);display:grid;place-items:center;flex:none}
+.banner b{display:block;font-size:15px;font-weight:600;letter-spacing:-.015em}
+.banner span{font-size:14px;color:var(--label2);letter-spacing:-.01em}
+
+@media (prefers-reduced-transparency:reduce){
+  .navbar::before,.tabbar::before{background:var(--bar-solid);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .banner{background:var(--cell);backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media (prefers-reduced-motion:reduce){
+  .seg i,.switch span::after{transition:none}
+  .sheet,.page,.banner{transition:opacity .2s ease}}
+</style>
+
+<main class="stage">
+  <section class="pitch">
+    <span class="eyebrow">Demo · sample data only</span>
+    <h1>StormLog</h1>
+    <p class="lede">Proof of service for commercial snow contractors. Crews log every plow and salt visit in about 30 seconds. When a slip-and-fall claim shows up, you pull that lot's evidence packet in one tap.</p>
+    <ol class="try">
+      <li><span>Tap a red site, like <b>Lakeview Dental</b>.</span></li>
+      <li><span>Tap <b>Start Visit</b>, take the before and after photos, then <b>Finish</b>.</span></li>
+      <li><span>Open <b>Packets</b> to see the claim-ready report. Drag the sheet down or flick it to close.</span></li>
+    </ol>
+    <p class="fine">Every site, crew member, photo and weather reading here is made up. In the real app, weather comes from the nearest National Weather Service station and photos come from the crew's camera. StormLog documents the work you did; it is not legal advice and does not promise any outcome in a claim.</p>
+    <p class="fine">Want to try it with a crew this winter? Reply to the email Hassanur sent you.</p>
+  </section>
+
+  <div class="device-wrap" id="wrap">
+    <div class="device" id="device">
+      <div class="screen" id="screen">
+        <div class="island"></div>
+        <div class="statusbar"><span id="clock" class="mono" style="font-family:var(--font)">4:10</span>
+          <span class="icons" aria-hidden="true">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.6c2.2 0 4.2.9 5.7 2.3l1.1-1.1A9.7 9.7 0 0 0 8 1 9.7 9.7 0 0 0 1.2 3.8l1.1 1.1A8.1 8.1 0 0 1 8 2.6zm0 3.2c1.3 0 2.5.5 3.4 1.3l1.1-1.1A6.4 6.4 0 0 0 8 4.2c-1.7 0-3.3.7-4.5 1.8l1.1 1.1C5.5 6.3 6.7 5.8 8 5.8zm0 3.2c-.5 0-.9.2-1.2.5L8 10.7l1.2-1.2C8.9 9.2 8.5 9 8 9z"/></svg>
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="16" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2z" fill="currentColor" opacity=".45"/></svg>
+          </span></div>
+
+        <div class="stack" id="stack">
+          <!-- Storm tab -->
+          <div class="page" id="p-storm">
+            <header class="navbar" id="nb-storm"><span class="nav-title">Storm</span></header>
+            <div class="scroll" id="sc-storm"></div>
+          </div>
+          <!-- Packets tab -->
+          <div class="page" id="p-packets" hidden>
+            <header class="navbar" id="nb-packets"><span class="nav-title">Packets</span></header>
+            <div class="scroll" id="sc-packets"></div>
+          </div>
+          <!-- Pushed packet -->
+          <div class="page" id="p-push" style="transform:translateX(390px);z-index:25;box-shadow:-8px 0 24px rgba(0,0,0,.12)" hidden>
+            <header class="navbar always" id="nb-push">
+              <button class="nav-btn" id="backBtn" style="justify-self:start"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>Packets</button>
+              <span class="nav-title" id="push-title"></span>
+              <button class="nav-btn" id="shareBtn" style="justify-self:end" aria-label="Share PDF"><svg width="20" height="24" viewBox="0 0 20 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15V2M5.5 6.5 10 2l4.5 4.5M6 10H3.5a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 3.5 22h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 16.5 10H14"/></svg></button>
+            </header>
+            <div class="scroll" id="sc-push"></div>
+            <div id="edge" style="position:absolute;left:0;top:98px;bottom:0;width:22px;z-index:21;touch-action:none"></div>
+          </div>
+
+          <nav class="tabbar" role="tablist" id="tabbar">
+            <button class="tab" role="tab" aria-selected="true" data-tab="storm">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M13 2v22M3.5 7.5l19 11M3.5 18.5l19-11M10 3.5l3 3 3-3M10 22.5l3-3 3 3M2.6 11.4l4.1 1.1-1.1 4.1M23.4 14.6l-4.1-1.1 1.1-4.1M5.6 9.4l1.1 4.1M20.4 16.6l-1.1-4.1"/></svg>Storm</button>
+            <button class="tab" role="tab" aria-selected="false" data-tab="packets">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 2.5h9.5L21 8v15.5H6z"/><path d="M15 2.5V8.5h6M9.5 13h8M9.5 17h8M9.5 21h5" stroke-linecap="round"/></svg>Packets</button>
+          </nav>
+        </div>
+
+        <div class="scrim" id="scrim"></div>
+        <section class="sheet" id="sheet" aria-modal="true" role="dialog" aria-label="Site">
+          <div class="sheet-head" id="sheetHead"><div class="grabber"></div><div class="sheet-bar" id="sheetBar"></div></div>
+          <div class="sheet-body" id="sheetBody"></div>
+        </section>
+
+        <div class="banner" id="banner" aria-live="polite"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div><b id="bTitle"></b><span id="bText"></span></div></div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- spring (damping ratio + response, interruptible, velocity-aware) ---------- */
+function springValue(apply, initial){
+  const s = {x:initial, v:0, target:initial, raf:0, z:1, r:.4, done:null};
+  function loop(now){
+    let dt = Math.min(.034, (now - s.last)/1000); s.last = now;
+    const k = Math.pow(2*Math.PI/s.r, 2), c = 4*Math.PI*s.z/s.r, n = 4, h = dt/n;
+    for(let i=0;i<n;i++){ const a = -k*(s.x - s.target) - c*s.v; s.v += a*h; s.x += s.v*h; }
+    apply(s.x);
+    if(Math.abs(s.v) < 4 && Math.abs(s.x - s.target) < .4){ s.x = s.target; s.v = 0; apply(s.x); s.raf = 0; const d = s.done; s.done = null; d && d(); }
+    else s.raf = requestAnimationFrame(loop);
+  }
+  s.to = (target, o = {}) => {
+    s.target = target; s.z = o.damping ?? 1; s.r = o.response ?? .4; s.done = o.onDone || null;
+    if(o.velocity !== undefined) s.v = o.velocity;
+    if(reduced){ cancelAnimationFrame(s.raf); s.raf = 0; s.x = target; s.v = 0; apply(target); const d=s.done; s.done=null; d && d(); return; }
+    if(!s.raf){ s.last = performance.now(); s.raf = requestAnimationFrame(loop); }
+  };
+  s.set = x => { cancelAnimationFrame(s.raf); s.raf = 0; s.x = x; s.v = 0; apply(x); };
+  apply(initial);
+  return s;
+}
+const project = (v, d = .998) => (v/1000) * d / (1 - d);
+const rubber = (o, dim, c = .55) => (o * dim * c) / (dim + c * Math.abs(o));
+function tracker(){ const h=[]; return { add(p){ const t=performance.now(); h.push([p,t]); while(h.length>1 && t-h[0][1]>90) h.shift(); },
+  vel(){ if(h.length<2) return 0; const [p0,t0]=h[0],[p1,t1]=h[h.length-1]; return t1>t0 ? (p1-p0)/((t1-t0)/1000) : 0; }, reset(){h.length=0} }; }
+
+/* ---------- device scaling ---------- */
+let scale = 1;
+function fit(){
+  const w = $("wrap").clientWidth || Math.min(414, document.documentElement.clientWidth - 32);
+  const hFit = (window.innerHeight - 48) / 868;
+  scale = Math.max(.3, Math.min(1, w/414, hFit > .5 ? hFit : 1));
+  const d = $("device");
+  d.style.transform = `scale(${scale})`;
+  d.style.left = Math.max(0, (w - 414*scale)/2) + "px";
+  $("wrap").style.height = (868*scale)+"px";
+}
+new ResizeObserver(fit).observe($("wrap")); window.addEventListener("resize", fit); fit();
+
+/* ---------- sample data ---------- */
+const STORM = {name:"Dec 9–10 Storm", sub:"Sample storm · 6.4 in at KMSP", total:"6.4 in"};
+const sites = [
+  {id:"s1", name:"Maple Ridge Townhomes", short:"Maple Ridge", kind:"HOA · 3 drives, 48 units", addr:"Sample address · Apple Valley", lat:44.7319, lng:-93.2177, trigger:2, visits:[]},
+  {id:"s2", name:"Cedar Point Retail", short:"Cedar Point", kind:"Retail lot · 64 stalls", addr:"Sample address · Eagan", lat:44.8041, lng:-93.1669, trigger:1, visits:[]},
+  {id:"s3", name:"Lakeview Dental", short:"Lakeview Dental", kind:"Office lot · 22 stalls + walks", addr:"Sample address · Burnsville", lat:44.7677, lng:-93.2777, trigger:1, visits:[]},
+  {id:"s4", name:"Northgate Auto Service", short:"Northgate Auto", kind:"Shop lot · 18 stalls", addr:"Sample address · Lakeville", lat:44.6497, lng:-93.2427, trigger:2, visits:[]}
+];
+const WEATHER = [["10 PM","27°","Light snow","0.3"],["12 AM","25°","Snow","0.8"],["1 AM","25°","Heavy snow","1.1"],["2 AM","24°","Snow","0.9"],
+  ["3 AM","23°","Snow","0.8"],["4 AM","22°","Light snow","0.5"],["5 AM","21°","Light snow","0.3"],["6 AM","20°","Flurries","0.1"],["8 AM","19°","Snow ended","0.0"]];
+let mins = 4*60+10, inProg = null, currentSheetSite = null;
+
+const fmt = m => { let h=Math.floor(m/60)%24, mm=m%60, ap=h>=12?"PM":"AM"; h=h%12||12; return h+":"+String(mm).padStart(2,"0")+" "+ap; };
+const clockTxt = m => { let h=Math.floor(m/60)%24; h=h%12||12; return h+":"+String(m%60).padStart(2,"0"); };
+const jit = v => (v+(Math.random()-.5)*.0006).toFixed(5);
+const fp = s => { let h=2166136261; for(const c of s){h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return (h>>>0).toString(16).padStart(8,"0"); };
+function tick(n){ mins += n; $("clock").textContent = clockTxt(mins); }
+function photo(kind, time, name){
+  const snow = kind==="before";
+  const lines = Array.from({length:7},(_,i)=>`<rect x="${20+i*42}" y="70" width="4" height="${snow?18:60}" fill="#f4f4f0" opacity="${snow?.5:.9}"/>`).join("");
+  const top = snow ? `<path d="M0 120 Q60 95 120 115 T240 108 T320 118 V240 H0Z" fill="#f4f7fa"/><path d="M0 160 Q90 140 170 158 T320 150 V240 H0Z" fill="#fff"/>`
+    : `<path d="M0 205 Q80 196 160 204 T320 200 V240 H0Z" fill="#eef2f5"/><g fill="#d9dfe4" opacity=".7">${Array.from({length:40},(_,i)=>`<circle cx="${(i*37)%320}" cy="${130+(i*23)%60}" r="1.6"/>`).join("")}</g>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240"><rect width="320" height="240" fill="${snow?'#8e99a3':'#4a535b'}"/><rect width="320" height="60" fill="#5b6872"/><rect x="230" y="18" width="70" height="42" fill="#3b444c"/>${lines}${top}<rect y="210" width="320" height="30" fill="rgba(10,14,18,.7)"/><text x="10" y="230" font-family="monospace" font-size="12.5" fill="#fff">${kind.toUpperCase()} ${time} · ${name.slice(0,24)}</text></svg>`;
+  return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+function preVisit(site, crew, truck, s, e, services, salt){
+  site.visits.push({crew, truck, start:fmt(s), end:fmt(e), services, salt, gps:jit(site.lat)+", "+jit(site.lng), locked:true,
+    before:{src:photo("before",fmt(s+1),site.name), t:fmt(s+1), id:fp(site.id+s+"b")},
+    after:{src:photo("after",fmt(e-1),site.name), t:fmt(e-1), id:fp(site.id+e+"a")}});
+}
+preVisit(sites[1],"Dana (sample)","Truck 1",112,134,["Plow","Salt","Sidewalks"],450);
+preVisit(sites[0],"Dana (sample)","Truck 1",151,185,["Plow","Sidewalks"],0);
+
+const status = s => inProg && inProg.site===s.id ? "prog" : s.visits.length ? "done" : "none";
+const ICON = {
+  done:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`,
+  prog:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>`,
+  none:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 6.5v7M12 17.5v.2"/></svg>`,
+  off:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/></svg>`,
+  chev:`<svg class="chev" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5l6 6-6 6"/></svg>`,
+  cam:`<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3.5 9.5a2 2 0 0 1 2-2h3.2l2-3h6.6l2 3h3.2a2 2 0 0 1 2 2V21a2 2 0 0 1-2 2h-17a2 2 0 0 1-2-2z"/><circle cx="14" cy="14.5" r="4.5"/></svg>`
+};
+
+/* ---------- Storm tab ---------- */
+function renderStorm(){
+  const c = {done:0,prog:0,none:0}; sites.forEach(s => c[status(s)]++);
+  const rows = sites.map(s => { const st = status(s), last = s.visits.at(-1);
+    const sub = st==="prog" ? `On site since ${fmt(inProg.start)} · Truck 2` : last ? `Done ${last.end} · ${last.services.join(", ")}` : `${s.trigger}" trigger reached · waiting`;
+    return `<button class="cell" data-site="${s.id}"><span class="dot ${st}">${ICON[st]}</span><span style="min-width:0"><div class="t">${esc(s.name)}</div><div class="s">${sub}</div></span>${ICON.chev}</button>`; }).join("");
+  $("sc-storm").innerHTML = `<h1 class="large-title">Storm</h1>
+    <div class="card storm-card"><h2>${STORM.name}</h2><p class="sub">${STORM.sub}</p>
+      <div class="seg"><i style="flex-grow:${c.done};background:var(--green)"></i><i style="flex-grow:${c.prog};background:#ff9f0a"></i><i style="flex-grow:${c.none};background:var(--red)"></i></div>
+      <div class="legend"><div><b style="color:var(--green)">${c.done}</b><span>Serviced</span></div><div><b style="color:var(--amber)">${c.prog}</b><span>On site</span></div><div><b style="color:var(--red)">${c.none}</b><span>Waiting</span></div></div></div>
+    <p class="section-h">Sites · ${sites.length}</p><div class="list">${rows}</div>
+    <p class="section-f">All sites, crews, photos and weather are sample data.</p>`;
+  $("sc-storm").querySelectorAll("[data-site]").forEach(b => b.onclick = () => openSheet(b.dataset.site));
+}
+
+/* ---------- Packets tab ---------- */
+function renderPackets(){
+  const rows = sites.map(s => { const n = s.visits.length;
+    return n ? `<button class="cell" data-packet="${s.id}"><span class="dot done">${ICON.off}</span><span style="min-width:0"><div class="t">${esc(s.name)}</div><div class="s">${n} visit${n>1?"s":""} · Dec 9–10</div></span>${ICON.chev}</button>`
+             : `<div class="cell" aria-disabled="true"><span class="dot off">${ICON.off}</span><span style="min-width:0"><div class="t" style="color:var(--label2)">${esc(s.name)}</div><div class="s">No visits logged yet</div></span><span></span></div>`; }).join("");
+  $("sc-packets").innerHTML = `<h1 class="large-title">Packets</h1>
+    <p class="section-h" style="margin-top:4px">${STORM.name}</p><div class="list">${rows}</div>
+    <p class="section-f">Each packet holds the visit log, photos with time and location, and weather for that site. Send it to your insurer or lawyer when a claim comes in.</p>`;
+  $("sc-packets").querySelectorAll("[data-packet]").forEach(b => b.onclick = () => pushPacket(b.dataset.packet));
+}
+
+/* ---------- navbars (scroll edge effect) ---------- */
+[["sc-storm","nb-storm"],["sc-packets","nb-packets"]].forEach(([sc,nb]) => $(sc).addEventListener("scroll", e => $(nb).classList.toggle("scrolled", e.target.scrollTop > 36), {passive:true}));
+
+/* ---------- tabs ---------- */
+let tab = "storm";
+function setTab(t){
+  if(t===tab) return; tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===t));
+  $("p-storm").hidden = t!=="storm"; $("p-packets").hidden = t!=="packets";
+  if(t!=="packets") closePush(true);
+}
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => setTab(b.dataset.tab));
+
+/* ---------- push navigation (enters from the right, leaves to the right) ---------- */
+const pushX = springValue(x => {
+  $("p-push").style.transform = `translateX(${x}px)`;
+  const p = 1 - x/390; $("p-packets").style.transform = `translateX(${-90*p}px)`; $("p-packets").style.filter = `brightness(${1-.06*p})`;
+}, 390);
+function pushPacket(id){
+  renderPacketDoc(id); setTab("packets"); $("p-push").hidden = false; $("sc-push").scrollTop = 0;
+  pushX.to(0, {damping:1, response:.38});
+}
+function closePush(instant, velocity){
+  if($("p-push").hidden) return;
+  if(instant){ pushX.set(390); $("p-push").hidden = true; return; }
+  pushX.to(390, {damping:1, response:.36, velocity, onDone:() => $("p-push").hidden = true});
+}
+$("backBtn").onclick = () => closePush(false);
+$("shareBtn").onclick = () => showBanner("Share PDF", "Exporting the packet works in the full app.");
+(function edgeSwipe(){ const el = $("edge"), tr = tracker(); let x0=0, start=0, on=false;
+  el.addEventListener("pointerdown", e => { el.setPointerCapture(e.pointerId); on=true; x0=e.clientX; start=pushX.x; pushX.set(pushX.x); tr.reset(); tr.add(e.clientX/scale); });
+  el.addEventListener("pointermove", e => { if(!on) return; tr.add(e.clientX/scale); let x = start + (e.clientX-x0)/scale; if(x<0) x = -rubber(-x,390); pushX.set(Math.min(390,x)); });
+  const end = () => { if(!on) return; on=false; const v = tr.vel(), dest = pushX.x + project(v);
+    if(dest > 195 || v > 600) closePush(false, v); else pushX.to(0, {damping:1, response:.35, velocity:v}); };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+})();
+
+function renderPacketDoc(id){
+  const s = sites.find(x => x.id===id), v = s.visits;
+  $("push-title").textContent = s.short;
+  const visits = v.map(x => `<div><div class="top"><span class="mono">${x.start} – ${x.end}</span><span>${esc(x.truck)}</span></div>
+    <div>${x.services.join(", ")}${x.salt?` · ${x.salt} lbs salt`:""}</div><div class="meta">${esc(x.crew)} · GPS <span class="mono">${x.gps}</span></div></div>`).join("");
+  const thumbs = v.flatMap(x => [["Before",x.before],["After",x.after]].map(([k,p]) => `<figure><img alt="${k} photo, ${esc(s.name)}" src="${p.src}"><b>${k}</b> · Dec 10 ${p.t}<br><span class="mono">ID ${p.id}</span></figure>`)).join("");
+  const wx = `<span class="h">Hour</span><span class="h">Temp</span><span class="h">Conditions</span><span class="h">Snow</span>` + WEATHER.map(w => `<span class="mono">${w[0]}</span><span class="mono">${w[1]}</span><span>${w[2]}</span><span class="mono">${w[3]} in</span>`).join("");
+  const open = v.some(x => !x.locked);
+  $("sc-push").innerHTML = `<article class="paper">
+    <div class="ph"><span class="kicker">Service evidence packet</span><h2>${esc(s.name)}</h2><span class="addr">${esc(s.addr)} · ${esc(s.kind)}</span></div>
+    <dl class="facts"><div><dt>Period</dt><dd>Dec 9–10, 2025</dd></div><div><dt>Trigger</dt><dd>${s.trigger} in of snow</dd></div>
+      <div><dt>Visits</dt><dd>${v.length}</dd></div><div><dt>Storm total</dt><dd>${STORM.total}</dd></div></dl>
+    <h4>Visit log</h4><div class="rows">${visits}</div>
+    <h4>Photos</h4><div class="thumbs">${thumbs}</div>
+    <h4>Weather · KMSP (sample readings)</h4><div class="wx">${wx}</div>
+    <h4>Record history</h4><p style="margin:0;font-size:13px">${open?"The newest visit locks 24 hours after it was finished. Any change after that is listed here.":"All visits are locked. No changes were made after locking."}</p>
+    <p class="note">Times come from StormLog's server, not the crew's phone. Packet ${fp(s.id+v.length)} · sample data. This packet documents logged service. It is not legal advice and does not guarantee any outcome.</p>
+  </article>`;
+}
+
+/* ---------- sheet (drag, flick, rubber-band, pushes the stack back) ---------- */
+const H = 782;
+const sheetY = springValue(y => {
+  $("sheet").style.transform = `translateY(${y}px)`;
+  const p = Math.max(0, Math.min(1, 1 - y/H));
+  $("scrim").style.opacity = p;
+  $("stack").style.transform = `scale(${1 - .07*p}) translateY(${-6*p}px)`;
+  $("stack").style.borderRadius = (p*14)+"px"; $("stack").style.overflow = p>0.01 ? "hidden" : "";
+  if(reduced) $("sheet").style.opacity = p>0 ? 1 : 0;
+}, H+20);
+let sheetOpen = false;
+function openSheet(id){
+  currentSheetSite = id; renderSheet(); sheetOpen = true; $("scrim").classList.add("on");
+  $("sheetBody").scrollTop = 0; sheetY.to(0, {damping:1, response:.38});
+}
+function closeSheet(velocity){
+  sheetOpen = false; $("scrim").classList.remove("on");
+  sheetY.to(H+20, {damping:1, response:.34, velocity});
+}
+$("scrim").onclick = () => closeSheet();
+(function dragSheet(){ const el = $("sheetHead"), tr = tracker(); let y0=0, start=0, on=false;
+  el.addEventListener("pointerdown", e => { if(e.target.closest("button")) return; el.setPointerCapture(e.pointerId); on=true; y0=e.clientY; start=sheetY.x; sheetY.set(sheetY.x); tr.reset(); tr.add(e.clientY/scale); });
+  el.addEventListener("pointermove", e => { if(!on) return; tr.add(e.clientY/scale); let y = start + (e.clientY-y0)/scale; if(y<0) y = -rubber(-y, H); sheetY.set(y); });
+  const end = () => { if(!on) return; on=false; const v = tr.vel(), dest = sheetY.x + project(v);
+    if(dest > H*.4) closeSheet(v); else sheetY.to(0, {damping: Math.abs(v)>300 ? .82 : 1, response:.32, velocity:v}); };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+})();
+
+function renderSheet(){
+  const s = sites.find(x => x.id===currentSheetSite);
+  if(inProg && inProg.site===s.id && inProg.form) return renderVisitForm(s);
+  const st = status(s), last = s.visits.at(-1);
+  const label = {done:"Serviced",prog:"Visit in progress",none:"Not started"}[st];
+  $("sheetBar").innerHTML = `<span></span><h3>Site</h3><button class="nav-btn r" id="sDone">Done</button>`;
+  $("sDone").onclick = () => closeSheet();
+  const busyElsewhere = inProg && inProg.site !== s.id;
+  $("sheetBody").innerHTML = `<div class="site-hero"><h2>${esc(s.name)}</h2><p>${esc(s.kind)}</p><p>${esc(s.addr)}</p><div style="margin-top:6px"><span class="pill ${st}">${label}</span></div></div>
+    <div class="list plain">
+      <div class="cell"><span></span><span class="t">Plow trigger</span><span class="v">${s.trigger} in</span></div>
+      <div class="cell"><span></span><span class="t">Last visit</span><span class="v">${last ? last.start+" – "+last.end : "None yet"}</span></div>
+      <div class="cell"><span></span><span class="t">Visits this storm</span><span class="v">${s.visits.length}</span></div>
+    </div>
+    ${last ? `<p class="section-h">Last visit</p><div class="list plain"><div class="cell"><span></span><span style="min-width:0"><div class="t">${last.services.join(", ")}</div><div class="s">${esc(last.crew)} · ${esc(last.truck)}${last.salt?` · ${last.salt} lbs salt`:""}</div></span><span></span></div></div>` : ""}
+    <div class="actions">
+      <button class="btn fill" id="startBtn" ${busyElsewhere?"disabled":""}>${st==="prog"?"Resume Visit":"Start Visit"}</button>
+      <button class="btn gray" id="pktBtn" ${s.visits.length?"":"disabled"}>View Evidence Packet</button>
+    </div>
+    <p class="section-f">${busyElsewhere ? "Finish the visit at "+esc(sites.find(x=>x.id===inProg.site).short)+" first." : "Starting a visit records the time and the truck's location."}</p>`;
+  $("startBtn").onclick = () => { if(!inProg){ inProg = {site:s.id, start:mins, before:null, after:null, services:new Set(["Plow"]), salt:0}; tick(1); renderStorm(); }
+    inProg.form = true; swapSheet(() => renderVisitForm(s)); };
+  $("pktBtn").onclick = () => { closeSheet(); setTimeout(() => pushPacket(s.id), reduced ? 0 : 140); };
+}
+function swapSheet(fn){
+  const body = $("sheetBody");
+  if(reduced || !body.animate){ fn(); return; }
+  body.animate([{opacity:1, transform:"translateX(0)"},{opacity:0, transform:"translateX(-24px)"}], {duration:120, easing:"ease-in"}).onfinish = () => {
+    fn(); body.animate([{opacity:0, transform:"translateX(24px)"},{opacity:1, transform:"translateX(0)"}], {duration:220, easing:"cubic-bezier(.2,.8,.2,1)"}); };
+}
+function renderVisitForm(s){
+  const ip = inProg, ready = ip.before && ip.after;
+  $("sheetBar").innerHTML = `<button class="nav-btn" id="vClose" style="justify-self:start">Close</button><h3>On Site</h3><button class="nav-btn r" id="vFinish" ${ready?"":"disabled"} style="${ready?"":"opacity:.35"}">Finish</button>`;
+  const svc = ["Plow","Salt","Sidewalks","Loader / stacking"].map((n,i) => `<label class="cell" for="sv${i}"><span></span><span class="t">${n}</span><span class="switch"><input type="checkbox" id="sv${i}" value="${n}" ${ip.services.has(n)?"checked":""}><span></span></span></label>`).join("");
+  const shot = (k, p, en) => `<button class="shot" id="shot-${k}" ${en?"":"disabled"} aria-label="Take ${k} photo">${p?`<img alt="${k} photo" src="${p.src}"><span class="tag">${k==="before"?"Before":"After"} · ${p.t}</span>`:`${ICON.cam}<span>${k==="before"?"Before":"After"} photo</span>`}<span class="flash"></span></button>`;
+  $("sheetBody").innerHTML = `<div class="site-hero" style="padding-bottom:12px"><h2>${esc(s.name)}</h2><p>${esc(s.kind)}</p></div>
+    <div class="timer"><b>Started ${fmt(ip.start)}</b><span class="mono">${mins-ip.start} min</span></div>
+    <p class="section-h">Photos</p><div class="shots">${shot("before",ip.before,true)}${shot("after",ip.after,!!ip.before)}</div>
+    <p class="section-f">${ready ? "Both photos taken. Tap Finish to save the visit." : ip.before ? "Now take the after photo once the lot is clear." : "Take a before photo of the lot first."}</p>
+    <p class="section-h">Services done</p><div class="list plain">${svc}</div>
+    <p class="section-h">Salt used</p><div class="list plain"><div class="cell"><span></span><span class="t mono" id="saltV">${ip.salt} lbs</span><span class="stepper"><button id="saltM" aria-label="Less salt">−</button><button id="saltP" aria-label="More salt">+</button></span></div></div>
+    <p class="section-f">Time and GPS location are recorded automatically and can't be edited after 24 hours.</p>`;
+  $("vClose").onclick = () => { ip.form = false; closeSheet(); renderStorm(); };
+  $("vFinish").onclick = () => ready && finish(s);
+  ["before","after"].forEach(k => { const b = $("shot-"+k); b.onclick = () => {
+    if(ip[k] || b.disabled) return; tick(k==="after" ? 17 : 1);
+    ip[k] = {src:photo(k, fmt(mins), s.name), t:fmt(mins), id:fp(s.id+mins+k)};
+    if(!reduced){ const f = b.querySelector(".flash"); f.animate([{opacity:.95},{opacity:0}], {duration:260, easing:"ease-out"}); }
+    setTimeout(() => renderVisitForm(s), reduced ? 0 : 140); }; });
+  $("sheetBody").querySelectorAll(".switch input").forEach(c => c.onchange = () => c.checked ? ip.services.add(c.value) : ip.services.delete(c.value));
+  $("saltM").onclick = () => { ip.salt = Math.max(0, ip.salt-50); $("saltV").textContent = ip.salt+" lbs"; };
+  $("saltP").onclick = () => { ip.salt += 50; $("saltV").textContent = ip.salt+" lbs"; };
+}
+function finish(s){
+  tick(2); const ip = inProg;
+  s.visits.push({crew:"Marcus (sample)", truck:"Truck 2", start:fmt(ip.start), end:fmt(mins), services:[...ip.services], salt:ip.salt,
+    gps:jit(s.lat)+", "+jit(s.lng), before:ip.before, after:ip.after, locked:false});
+  inProg = null; closeSheet(); renderStorm(); renderPackets();
+  try{ navigator.vibrate && navigator.vibrate(12); }catch(e){}
+  showBanner("Visit saved", `${s.short} · ${s.visits.at(-1).start} – ${s.visits.at(-1).end}`);
+}
+
+/* ---------- banner (drops from the top, leaves the same way) ---------- */
+let bTimer;
+const bannerY = springValue(y => $("banner").style.transform = `translateY(${y}px)`, -160);
+function showBanner(title, text){
+  $("bTitle").textContent = title; $("bText").textContent = text; clearTimeout(bTimer);
+  bannerY.to(0, {damping:.86, response:.42});
+  bTimer = setTimeout(() => bannerY.to(-160, {damping:1, response:.36}), 2600);
+}
+
+/* live timer while on site */
+setInterval(() => { if(inProg && inProg.form && sheetOpen){ tick(1); const t = document.querySelector(".timer .mono"); if(t) t.textContent = (mins-inProg.start)+" min"; } }, 4000);
+
+renderStorm(); renderPackets();
+})();
+</script>
+</body>
+</html>

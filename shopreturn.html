@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>if(location.hash==="#embed")document.documentElement.classList.add("embed")</script>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}html.embed body{background:transparent!important;padding:0!important;overflow:hidden}html.embed .pitch{display:none!important}html.embed .stage{display:block!important}html.embed .device-wrap{margin:0 auto}</style>
+</head>
+<body>
+<title>ShopReturn Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a short pitch column beside a life-size iPhone running ShopReturn; stacks pitch-over-phone on narrow screens */
+:root{
+  --stage:#e7e9ec; --stage-ink:#14171b; --stage-muted:#575f69;
+  --bg:#f2f2f7; --cell:#ffffff; --label:#000000; --label2:rgba(60,60,67,.62); --label3:rgba(60,60,67,.32);
+  --sep:rgba(60,60,67,.24); --fill:rgba(120,120,128,.12); --fill2:rgba(120,120,128,.2);
+  --tint:#1d63d8; --tint-ink:#ffffff; --green:#248a3d; --green-bg:rgba(52,199,89,.16); --amber:#a86400; --amber-bg:rgba(255,159,10,.18);
+  --red:#d70015; --red-bg:rgba(255,59,48,.13); --orange:#ff9f0a;
+  --bar:rgba(249,249,250,.78); --bar-solid:#f9f9fa; --banner:rgba(250,250,252,.86);
+  --scrim:rgba(0,0,0,.32); --paper:#ffffff; --paper-ink:#111418; --paper-muted:#5d6670; --paper-line:#e2e6ea;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --stage:#0c0d10; --stage-ink:#eef0f3; --stage-muted:#9aa3ae;
+  --bg:#000000; --cell:#1c1c1e; --label:#ffffff; --label2:rgba(235,235,245,.62); --label3:rgba(235,235,245,.3);
+  --sep:rgba(84,84,88,.6); --fill:rgba(120,120,128,.24); --fill2:rgba(120,120,128,.34);
+  --tint:#4b91ff; --tint-ink:#ffffff; --green:#30d158; --green-bg:rgba(48,209,88,.18); --amber:#ffd60a; --amber-bg:rgba(255,214,10,.16);
+  --red:#ff453a; --red-bg:rgba(255,69,58,.18);
+  --bar:rgba(22,22,24,.74); --bar-solid:#161618; --banner:rgba(40,40,44,.84); --scrim:rgba(0,0,0,.55); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --stage:#0c0d10; --stage-ink:#eef0f3; --stage-muted:#9aa3ae;
+  --bg:#000000; --cell:#1c1c1e; --label:#ffffff; --label2:rgba(235,235,245,.62); --label3:rgba(235,235,245,.3);
+  --sep:rgba(84,84,88,.6); --fill:rgba(120,120,128,.24); --fill2:rgba(120,120,128,.34);
+  --tint:#4b91ff; --tint-ink:#ffffff; --green:#30d158; --green-bg:rgba(48,209,88,.18); --amber:#ffd60a; --amber-bg:rgba(255,214,10,.16);
+  --red:#ff453a; --red-bg:rgba(255,69,58,.18);
+  --bar:rgba(22,22,24,.74); --bar-solid:#161618; --banner:rgba(40,40,44,.84); --scrim:rgba(0,0,0,.55); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--stage);color:var(--stage-ink);font-family:var(--font);font-size:15px;line-height:1.47;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--tint);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+
+.stage{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,414px);gap:56px;align-items:center}
+@media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr);gap:28px;justify-items:center}}
+.pitch{max-width:440px;display:grid;gap:18px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tint)}
+.pitch h1{margin:0;font-size:clamp(40px,6vw,56px);line-height:1.02;letter-spacing:-.025em;font-weight:700}
+.pitch .lede{margin:0;font-size:19px;line-height:1.42;letter-spacing:-.01em;color:var(--stage-muted)}
+.try{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:t}
+.try li{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;counter-increment:t}
+.try li::before{content:counter(t);width:24px;height:24px;border-radius:50%;background:var(--fill2);display:grid;place-items:center;font-size:13px;font-weight:600}
+.fine{font-size:13px;color:var(--stage-muted);margin:0;max-width:52ch}
+@media (max-width:860px){.pitch{max-width:430px;width:100%}}
+
+.device-wrap{width:414px;max-width:100%;min-height:200px;position:relative}
+.device{width:414px;height:868px;border-radius:66px;padding:12px;transform-origin:top left;position:absolute;top:0;left:0;
+  background:linear-gradient(145deg,#3d4148,#1f2227 40%,#383c43 70%,#16181c);box-shadow:0 0 0 1.5px #0d0e10 inset,0 40px 80px -30px rgba(0,0,0,.55),0 12px 24px -12px rgba(0,0,0,.35)}
+.device::before{content:"";position:absolute;inset:5px;border-radius:61px;background:#050506}
+.screen{position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--label);isolation:isolate;font-size:17px;line-height:1.29;letter-spacing:-.022em}
+.island{position:absolute;top:11px;left:50%;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000;z-index:60}
+.statusbar{position:absolute;top:0;left:0;right:0;height:54px;display:flex;justify-content:space-between;align-items:center;padding:4px 34px 0 46px;z-index:55;font-weight:600;font-size:16.5px;pointer-events:none}
+.statusbar .icons{display:flex;gap:6px;align-items:center}
+.homebar{position:absolute;bottom:8px;left:50%;width:139px;height:5px;margin-left:-69.5px;border-radius:3px;background:var(--label);z-index:70;pointer-events:none}
+
+.stack{position:absolute;inset:0;transform-origin:50% 100%;will-change:transform}
+.page{position:absolute;inset:0;background:var(--bg);will-change:transform}
+.scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;padding:98px 16px 110px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.navbar{position:absolute;top:0;left:0;right:0;height:98px;padding-top:54px;z-index:20;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding-inline:8px}
+.navbar::before{content:"";position:absolute;inset:0;background:var(--bar);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);opacity:0;transition:opacity .2s}
+.navbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:.5px;background:var(--sep);opacity:0;transition:opacity .2s}
+.navbar.scrolled::before,.navbar.scrolled::after,.navbar.always::before,.navbar.always::after{opacity:1}
+.navbar>*{position:relative}
+.nav-title{grid-column:2;font-weight:600;font-size:17px;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.navbar.scrolled .nav-title,.navbar.always .nav-title{opacity:1}
+.nav-btn{color:var(--tint);font-size:17px;display:flex;align-items:center;gap:2px;padding:8px;border-radius:8px}
+.nav-btn:active{opacity:.4}
+.nav-btn:disabled{opacity:.35}
+.nav-plus{grid-column:3;justify-self:end;width:36px;height:36px;border-radius:50%;background:var(--fill);color:var(--tint);display:grid;place-items:center}
+.nav-plus:active{transform:scale(.92)}
+.large-title{margin:4px 4px 14px;font-size:34px;line-height:1.2;font-weight:700;letter-spacing:-.03em}
+
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:83px;padding-bottom:34px;z-index:30;display:grid;grid-template-columns:1fr 1fr}
+.tabbar::before{content:"";position:absolute;inset:0;background:var(--bar);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--sep)}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:500;letter-spacing:.01em;color:var(--label3)}
+.tab[aria-selected="true"]{color:var(--tint)}
+.tab svg{width:26px;height:26px}
+
+.card{background:var(--cell);border-radius:14px;padding:16px}
+.money-card .k{font-size:13px;font-weight:600;color:var(--label2);letter-spacing:-.005em}
+.money-card .big{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin:2px 0 2px}
+.money-card .sub{font-size:14px;color:var(--label2);margin:0 0 14px}
+.seg{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;background:var(--fill)}
+.seg i{display:block;transition:flex-grow .45s cubic-bezier(.2,.8,.2,1)}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;gap:8px}
+.legend b{display:block;font-size:19px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.legend span{font-size:12px;color:var(--label2);letter-spacing:0;line-height:1.25;display:block}
+.alert{display:flex;gap:10px;align-items:center;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--red-bg);color:var(--red);font-size:15px;font-weight:600;letter-spacing:-.012em}
+.alert svg{flex:none}
+.section-h{margin:24px 16px 7px;font-size:13px;line-height:1.3;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
+.section-f{margin:7px 16px 0;font-size:13px;line-height:1.35;color:var(--label2);letter-spacing:-.005em}
+.list{background:var(--cell);border-radius:12px;overflow:hidden}
+.cell{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 16px;text-align:left;position:relative;min-height:44px}
+.cell+.cell::before{content:"";position:absolute;top:0;right:0;left:60px;height:.5px;background:var(--sep)}
+.list.plain .cell+.cell::before{left:16px}
+button.cell:active,label.cell:active{background:var(--fill2)}
+.cell .t{font-size:17px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .s{font-size:14px;line-height:1.3;color:var(--label2);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .v{color:var(--label2);font-size:17px;text-align:right}
+.cell .amt{font-size:17px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.cell .due{font-size:12px;font-weight:600;text-align:right}
+.trail{display:flex;align-items:center;gap:8px}
+.chev{color:var(--label3);width:9px;height:15px;flex:none}
+.dot{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#fff}
+.dot svg{width:18px;height:18px}
+.dot.shop{background:#8e8e93} .dot.late{background:var(--red)} .dot.sent{background:var(--orange)} .dot.done{background:var(--green)} .dot.vend{background:var(--tint)}
+.pill{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;letter-spacing:-.005em}
+.pill.shop{background:var(--fill2);color:var(--label)} .pill.late{background:var(--red-bg);color:var(--red)} .pill.sent{background:var(--amber-bg);color:var(--amber)} .pill.done{background:var(--green-bg);color:var(--green)}
+.c-red{color:var(--red)} .c-amber{color:var(--amber)} .c-muted{color:var(--label2)} .c-green{color:var(--green)}
+
+.btn{width:100%;height:50px;border-radius:14px;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s ease-out,opacity .1s}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn.fill{background:var(--tint);color:var(--tint-ink)}
+.btn.gray{background:var(--fill);color:var(--tint)}
+.btn:disabled{opacity:.35;transform:none;cursor:default}
+
+.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;z-index:40;pointer-events:none}
+.scrim.on{pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:782px;z-index:45;background:var(--bg);border-radius:12px 12px 0 0;transform:translateY(800px);will-change:transform;display:flex;flex-direction:column;box-shadow:0 -6px 30px rgba(0,0,0,.12)}
+.sheet-head{flex:none;touch-action:none;padding:6px 8px 0;cursor:grab}
+.grabber{width:36px;height:5px;border-radius:3px;background:var(--label3);margin:0 auto 4px}
+.sheet-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:44px}
+.sheet-bar h3{margin:0;font-size:17px;font-weight:600;grid-column:2}
+.sheet-bar .r{justify-self:end;font-weight:600}
+.sheet-bar .l{justify-self:start}
+.sheet-body{flex:1;overflow-y:auto;padding:4px 16px 50px;scrollbar-width:none}
+.sheet-body::-webkit-scrollbar{display:none}
+.hero{padding:6px 4px 16px;display:grid;gap:5px}
+.hero h2{margin:0;font-size:28px;line-height:1.14;font-weight:700;letter-spacing:-.028em}
+.hero p{margin:0;color:var(--label2);font-size:15px;letter-spacing:-.012em}
+.actions{display:grid;gap:10px;margin-top:22px}
+
+/* status track */
+.track{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+.track div{display:grid;gap:6px;font-size:12px;color:var(--label2);letter-spacing:-.005em;line-height:1.25}
+.track i{display:block;height:4px;border-radius:2px;background:var(--fill2)}
+.track .on i{background:var(--tint)} .track .on{color:var(--label)}
+.track b{font-weight:600;font-size:13px}
+
+.shot{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;background:var(--cell);display:grid;place-items:center;gap:4px;overflow:hidden;color:var(--tint);font-size:15px;font-weight:600;transition:transform .1s ease-out}
+.shot:active{transform:scale(.97)}
+.shot svg{width:28px;height:28px}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.shot .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.shot .tag{position:absolute;left:8px;top:8px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff}
+.field{width:100%;border:0;background:transparent;font-size:17px;text-align:right;color:var(--label);outline:none;min-width:0;letter-spacing:-.02em}
+.stepper{display:flex;background:var(--fill);border-radius:9px;overflow:hidden;flex:none}
+.stepper button{width:47px;height:32px;display:grid;place-items:center;font-size:22px;line-height:1;color:var(--label)}
+.stepper button:active{background:var(--fill2)}
+.stepper button+button{border-left:.5px solid var(--sep)}
+.radio{width:22px;height:22px;color:var(--tint);visibility:hidden}
+input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+input[type=radio]:checked~.radio{visibility:visible}
+label.cell{cursor:pointer}
+
+.paper{background:var(--paper);color:var(--paper-ink);border-radius:14px;padding:20px 18px;letter-spacing:-.01em;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.paper .ph{border-bottom:2px solid var(--paper-ink);padding-bottom:10px;display:grid;gap:2px}
+.paper .kicker{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--paper-muted)}
+.paper h2{margin:0;font-size:22px;line-height:1.15;font-weight:700;letter-spacing:-.025em}
+.paper .addr{font-size:13px;color:var(--paper-muted)}
+.paper h4{margin:18px 0 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--paper-muted);display:flex;justify-content:space-between}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:12px;font-size:13px}
+.facts dt{font-size:11px;color:var(--paper-muted);text-transform:uppercase;letter-spacing:.06em} .facts dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.rows{display:grid;font-size:13px}
+.rows>div{display:grid;gap:2px;padding:8px 0;border-bottom:1px solid var(--paper-line)}
+.rows .top{display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.rows .meta{color:var(--paper-muted);font-size:12px}
+.rows .flag{color:#c4000f;font-weight:600}
+.paper .none{font-size:13px;color:var(--paper-muted);margin:0}
+.paper .note{margin:16px 0 0;padding-top:10px;border-top:1px solid var(--paper-line);font-size:11px;line-height:1.4;color:var(--paper-muted)}
+
+.banner{position:absolute;top:54px;left:10px;right:10px;z-index:58;border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;
+  background:var(--banner);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:0 10px 30px rgba(0,0,0,.18);transform:translateY(-160px);will-change:transform}
+.banner .ico{width:38px;height:38px;border-radius:9px;background:var(--tint);display:grid;place-items:center;flex:none}
+.banner b{display:block;font-size:15px;font-weight:600;letter-spacing:-.015em}
+.banner span{font-size:14px;color:var(--label2);letter-spacing:-.01em}
+
+@media (prefers-reduced-transparency:reduce){
+  .navbar::before,.tabbar::before{background:var(--bar-solid);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .banner{background:var(--cell);backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media (prefers-reduced-motion:reduce){.seg i{transition:none}}
+</style>
+
+<main class="stage">
+  <section class="pitch">
+    <span class="eyebrow">Demo · sample data only</span>
+    <h1>ShopReturn</h1>
+    <p class="lede">Stop losing money on cores and warranty parts. Every core charge gets a return deadline, every return gets a photo of the signed slip, and every vendor credit gets checked off, so nothing sits in the back bin until it expires.</p>
+    <ol class="try">
+      <li><span>Tap the red <b>AC compressor</b> core. It's past its return date.</span></li>
+      <li><span>Tap <b>Mark Returned</b>, snap the return slip, and save. Then mark the turbo core <b>Credited</b>.</span></li>
+      <li><span>Open <b>Vendors</b> to see who still owes you money, with a list you can send their rep.</span></li>
+    </ol>
+    <p class="fine">Every part, vendor, repair order, vehicle and dollar amount here is made up. Use the + button to log a new core. Drag the sheet down or flick it to close.</p>
+    <p class="fine">Want to try it in your shop? Reply to the email Hassanur sent you.</p>
+  </section>
+
+  <div class="device-wrap" id="wrap">
+    <div class="device" id="device">
+      <div class="screen" id="screen">
+        <div class="island"></div>
+        <div class="statusbar"><span id="clock">8:14</span>
+          <span class="icons" aria-hidden="true">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.6c2.2 0 4.2.9 5.7 2.3l1.1-1.1A9.7 9.7 0 0 0 8 1 9.7 9.7 0 0 0 1.2 3.8l1.1 1.1A8.1 8.1 0 0 1 8 2.6zm0 3.2c1.3 0 2.5.5 3.4 1.3l1.1-1.1A6.4 6.4 0 0 0 8 4.2c-1.7 0-3.3.7-4.5 1.8l1.1 1.1C5.5 6.3 6.7 5.8 8 5.8zm0 3.2c-.5 0-.9.2-1.2.5L8 10.7l1.2-1.2C8.9 9.2 8.5 9 8 9z"/></svg>
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="14" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2z" fill="currentColor" opacity=".45"/></svg>
+          </span></div>
+
+        <div class="stack" id="stack">
+          <div class="page" id="p-returns">
+            <header class="navbar" id="nb-returns"><span class="nav-title">Returns</span>
+              <button class="nav-plus" id="addBtn" aria-label="Log a new core"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg></button></header>
+            <div class="scroll" id="sc-returns"></div>
+          </div>
+          <div class="page" id="p-vendors" hidden>
+            <header class="navbar" id="nb-vendors"><span class="nav-title">Vendors</span></header>
+            <div class="scroll" id="sc-vendors"></div>
+          </div>
+          <div class="page" id="p-push" style="transform:translateX(390px);z-index:25;box-shadow:-8px 0 24px rgba(0,0,0,.12)" hidden>
+            <header class="navbar always">
+              <button class="nav-btn" id="backBtn" style="justify-self:start"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>Vendors</button>
+              <span class="nav-title" id="push-title"></span>
+              <button class="nav-btn" id="shareBtn" style="justify-self:end" aria-label="Share list"><svg width="20" height="24" viewBox="0 0 20 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15V2M5.5 6.5 10 2l4.5 4.5M6 10H3.5a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 3.5 22h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 16.5 10H14"/></svg></button>
+            </header>
+            <div class="scroll" id="sc-push"></div>
+            <div id="edge" style="position:absolute;left:0;top:98px;bottom:0;width:22px;z-index:21;touch-action:none"></div>
+          </div>
+          <nav class="tabbar" role="tablist">
+            <button class="tab" role="tab" aria-selected="true" data-tab="returns">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h14.5a4.5 4.5 0 0 1 0 9H9"/><path d="M8 5.5 4 9.5l4 4"/></svg>Returns</button>
+            <button class="tab" role="tab" aria-selected="false" data-tab="vendors">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 10.5 13 4l9.5 6.5"/><path d="M5.5 10v11.5h15V10M10 21.5v-6h6v6" stroke-linecap="round"/></svg>Vendors</button>
+          </nav>
+        </div>
+
+        <div class="scrim" id="scrim"></div>
+        <section class="sheet" id="sheet" aria-modal="true" role="dialog" aria-label="Part">
+          <div class="sheet-head" id="sheetHead"><div class="grabber"></div><div class="sheet-bar" id="sheetBar"></div></div>
+          <div class="sheet-body" id="sheetBody"></div>
+        </section>
+
+        <div class="banner" id="banner" aria-live="polite"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div><b id="bTitle"></b><span id="bText"></span></div></div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- spring (damping ratio + response; interruptible; carries velocity) ---------- */
+function springValue(apply, initial){
+  const s = {x:initial, v:0, target:initial, raf:0, z:1, r:.4, done:null};
+  function loop(now){
+    const dt = Math.min(.034, (now - s.last)/1000); s.last = now;
+    const k = Math.pow(2*Math.PI/s.r, 2), c = 4*Math.PI*s.z/s.r, n = 4, h = dt/n;
+    for(let i=0;i<n;i++){ const a = -k*(s.x - s.target) - c*s.v; s.v += a*h; s.x += s.v*h; }
+    apply(s.x);
+    if(Math.abs(s.v) < 4 && Math.abs(s.x - s.target) < .4){ s.x = s.target; s.v = 0; apply(s.x); s.raf = 0; const d = s.done; s.done = null; d && d(); }
+    else s.raf = requestAnimationFrame(loop);
+  }
+  s.to = (target, o = {}) => {
+    s.target = target; s.z = o.damping ?? 1; s.r = o.response ?? .4; s.done = o.onDone || null;
+    if(o.velocity !== undefined) s.v = o.velocity;
+    if(reduced){ cancelAnimationFrame(s.raf); s.raf = 0; s.x = target; s.v = 0; apply(target); const d = s.done; s.done = null; d && d(); return; }
+    if(!s.raf){ s.last = performance.now(); s.raf = requestAnimationFrame(loop); }
+  };
+  s.set = x => { cancelAnimationFrame(s.raf); s.raf = 0; s.x = x; s.v = 0; apply(x); };
+  apply(initial); return s;
+}
+const project = (v, d = .998) => (v/1000) * d / (1 - d);
+const rubber = (o, dim, c = .55) => (o * dim * c) / (dim + c * Math.abs(o));
+function tracker(){ const h=[]; return { add(p){ const t=performance.now(); h.push([p,t]); while(h.length>1 && t-h[0][1]>90) h.shift(); },
+  vel(){ if(h.length<2) return 0; const [p0,t0]=h[0],[p1,t1]=h[h.length-1]; return t1>t0 ? (p1-p0)/((t1-t0)/1000) : 0; }, reset(){h.length=0} }; }
+
+/* ---------- device scaling ---------- */
+let scale = 1;
+function fit(){
+  const w = $("wrap").clientWidth || Math.min(414, document.documentElement.clientWidth - 32);
+  const hFit = (window.innerHeight - 48) / 868;
+  scale = Math.max(.3, Math.min(1, w/414, hFit > .5 ? hFit : 1));
+  const d = $("device"); d.style.transform = `scale(${scale})`; d.style.left = Math.max(0, (w - 414*scale)/2) + "px";
+  $("wrap").style.height = (868*scale) + "px";
+}
+new ResizeObserver(fit).observe($("wrap")); window.addEventListener("resize", fit); fit();
+
+/* ---------- sample data (day 0 = today in the demo) ---------- */
+const VENDORS = {
+  rid:{name:"Ridgeway Parts", rep:"Counter: sample rep", acct:"Acct 40-2291"},
+  key:{name:"Keystone Auto Supply", rep:"Counter: sample rep", acct:"Acct 7713"},
+  blu:{name:"Bluff City Parts", rep:"Counter: sample rep", acct:"Acct BC-118"}
+};
+let seq = 1;
+const mk = o => Object.assign({id:"p"+(seq++), photo:null, memo:null}, o);
+const parts = [
+  mk({part:"AC compressor", kind:"Core", vendor:"blu", ro:"4460", car:"2016 Toyota Camry", amt:120, bought:-33, window:30, status:"shop", inv:"BC-77120"}),
+  mk({part:"Brake calipers (pair)", kind:"Core", vendor:"key", ro:"4479", car:"2015 Honda Accord", amt:40, bought:-27, window:30, status:"shop", inv:"K-554812"}),
+  mk({part:"Alternator, reman", kind:"Core", vendor:"rid", ro:"4471", car:"2017 Ford F-150", amt:85, bought:-24, window:30, status:"shop", inv:"R-1189023"}),
+  mk({part:"Starter", kind:"Core", vendor:"rid", ro:"4483", car:"2019 Chevy Silverado", amt:60, bought:-12, window:30, status:"shop", inv:"R-1190457"}),
+  mk({part:"Turbocharger (diesel)", kind:"Core", vendor:"key", ro:"4452", car:"2018 Ram 2500", amt:450, bought:-30, window:30, status:"sent", sent:-16, inv:"K-553090"}),
+  mk({part:"Water pump", kind:"Warranty", vendor:"rid", ro:"4466", car:"2014 Subaru Outback", amt:72, bought:-40, window:60, status:"sent", sent:-5, inv:"R-1187550"}),
+  mk({part:"Power steering pump", kind:"Core", vendor:"blu", ro:"4441", car:"2012 Jeep Wrangler", amt:55, bought:-29, window:30, status:"done", sent:-11, credited:-2, memo:"CM-20817", inv:"BC-76985"}),
+  mk({part:"Battery", kind:"Core", vendor:"key", ro:"4458", car:"2020 Kia Sorento", amt:18, bought:-20, window:30, status:"done", sent:-14, credited:-9, memo:"CR-88412", inv:"K-553771"})
+];
+const PART_CHOICES = [["Alternator, reman",85],["Starter",60],["Brake caliper",25],["AC compressor",120],["Rack and pinion",150]];
+const CHASE_DAYS = 14;
+
+const money = n => "$" + n.toLocaleString("en-US");
+const dayLabel = d => { const t = new Date(2026,10,2); t.setDate(t.getDate()+d); return t.toLocaleDateString("en-US",{month:"short",day:"numeric"}); };
+const left = p => p.bought + p.window;              // days until return deadline (negative = past)
+const state = p => p.status==="shop" ? (left(p) < 0 ? "late" : "shop") : p.status;
+const fp = s => { let h=2166136261; for(const c of s){h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return (h>>>0).toString(16).padStart(8,"0"); };
+const chase = p => p.status==="sent" && -p.sent >= CHASE_DAYS;
+function dueText(p){
+  const st = state(p);
+  if(st==="late") return [`${-left(p)} days late`, "c-red"];
+  if(st==="shop") return [left(p) <= 7 ? `Due in ${left(p)} days` : `Due ${dayLabel(left(p))}`, left(p) <= 7 ? "c-amber" : "c-muted"];
+  if(st==="sent") return [chase(p) ? `No credit · ${-p.sent} days` : `Sent ${-p.sent} days ago`, chase(p) ? "c-red" : "c-amber"];
+  return [`Credited ${dayLabel(p.credited)}`, "c-green"];
+}
+function slip(part, vendor){
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><rect width="320" height="180" fill="#6b5b4b"/><g transform="rotate(-3 160 90)"><rect x="46" y="18" width="228" height="150" fill="#fbfaf6"/><rect x="58" y="30" width="110" height="10" fill="#2a2f36"/><rect x="58" y="48" width="200" height="4" fill="#c9cdd2"/><rect x="58" y="58" width="180" height="4" fill="#c9cdd2"/><text x="58" y="82" font-family="monospace" font-size="11" fill="#2a2f36">RETURN · ${part.slice(0,20).toUpperCase()}</text><text x="58" y="98" font-family="monospace" font-size="10" fill="#5d6670">${vendor.slice(0,26)}</text><rect x="58" y="108" width="200" height="1" fill="#2a2f36"/><path d="M64 140c10-14 18 6 28-6s14 8 26-4 12 6 22-2" stroke="#1a3c8f" stroke-width="2" fill="none"/><text x="180" y="148" font-family="monospace" font-size="9" fill="#5d6670">DRIVER SIGN</text></g></svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+const ICON = {
+  shop:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/></svg>`,
+  late:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 6.5v7M12 17.5v.2"/></svg>`,
+  sent:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17" cy="17.5" r="1.6"/></svg>`,
+  done:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`,
+  vend:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10l8-5 8 5M6 10v9h12v-9"/></svg>`,
+  chev:`<svg class="chev" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5l6 6-6 6"/></svg>`,
+  cam:`<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3.5 9.5a2 2 0 0 1 2-2h3.2l2-3h6.6l2 3h3.2a2 2 0 0 1 2 2V21a2 2 0 0 1-2 2h-17a2 2 0 0 1-2-2z"/><circle cx="14" cy="14.5" r="4.5"/></svg>`,
+  check:`<svg class="radio" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5l4.5 4.5L18 6.5"/></svg>`
+};
+
+/* ---------- Returns tab ---------- */
+function partCell(p){
+  const st = state(p), [dt, dc] = dueText(p);
+  return `<button class="cell" data-part="${p.id}"><span class="dot ${st}">${ICON[st]}</span>
+    <span style="min-width:0"><div class="t">${esc(p.part)}</div><div class="s">${p.kind} · ${esc(VENDORS[p.vendor].name)} · RO ${p.ro}</div></span>
+    <span class="trail"><span><div class="amt">${money(p.amt)}</div><div class="due ${dc}">${dt}</div></span>${ICON.chev}</span></button>`;
+}
+function renderReturns(){
+  const sum = f => parts.filter(f).reduce((a,p) => a + p.amt, 0);
+  const inShop = sum(p => p.status==="shop"), sent = sum(p => p.status==="sent"), done = sum(p => p.status==="done");
+  const late = parts.filter(p => state(p)==="late");
+  const open = parts.filter(p => p.status!=="done").sort((a,b) => (a.status==="shop"?left(a):99+a.sent) - (b.status==="shop"?left(b):99+b.sent));
+  const shop = open.filter(p => p.status==="shop"), out = open.filter(p => p.status==="sent"), closed = parts.filter(p => p.status==="done");
+  $("sc-returns").innerHTML = `<h1 class="large-title">Returns</h1>
+    <div class="card money-card"><div class="k">Owed to your shop</div><div class="big num">${money(inShop + sent)}</div>
+      <p class="sub">Core charges and warranty credits not yet back</p>
+      <div class="seg"><i style="flex-grow:${inShop};background:#8e8e93"></i><i style="flex-grow:${sent};background:var(--orange)"></i><i style="flex-grow:${done};background:var(--green)"></i></div>
+      <div class="legend"><div><b class="num">${money(inShop)}</b><span>Still in the shop</span></div><div><b class="num c-amber">${money(sent)}</b><span>Sent, no credit yet</span></div><div><b class="num c-green">${money(done)}</b><span>Credited this month</span></div></div>
+      ${late.length ? `<div class="alert"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.2"/></svg>${late.length} core${late.length>1?"s":""} past the return date · ${money(late.reduce((a,p)=>a+p.amt,0))} at risk</div>` : ""}
+    </div>
+    <p class="section-h">In the shop · ${shop.length}</p><div class="list">${shop.map(partCell).join("") || `<div class="cell"><span></span><span class="s">Nothing waiting to go back.</span><span></span></div>`}</div>
+    <p class="section-h">Sent back · waiting for credit · ${out.length}</p><div class="list">${out.map(partCell).join("") || `<div class="cell"><span></span><span class="s">No credits pending.</span><span></span></div>`}</div>
+    <p class="section-h">Credited · ${closed.length}</p><div class="list">${closed.map(partCell).join("")}</div>
+    <p class="section-f">All parts, vendors, repair orders and amounts are sample data.</p>`;
+  $("sc-returns").querySelectorAll("[data-part]").forEach(b => b.onclick = () => openSheet({mode:"part", id:b.dataset.part}));
+}
+
+/* ---------- Vendors tab ---------- */
+function vendorStats(k){
+  const ps = parts.filter(p => p.vendor===k);
+  return {ps, owed:ps.filter(p=>p.status!=="done").reduce((a,p)=>a+p.amt,0), chase:ps.filter(chase).length, late:ps.filter(p=>state(p)==="late").length};
+}
+function renderVendors(){
+  const rows = Object.keys(VENDORS).map(k => { const v = vendorStats(k), flags = v.chase + v.late;
+    return `<button class="cell" data-vendor="${k}"><span class="dot vend">${ICON.vend}</span>
+      <span style="min-width:0"><div class="t">${esc(VENDORS[k].name)}</div><div class="s ${flags?"c-red":""}">${flags ? `${flags} item${flags>1?"s":""} need${flags>1?"":"s"} attention` : "All caught up"}</div></span>
+      <span class="trail"><span class="amt">${money(v.owed)}</span>${ICON.chev}</span></button>`; }).join("");
+  $("sc-vendors").innerHTML = `<h1 class="large-title">Vendors</h1>
+    <p class="section-h" style="margin-top:4px">Money each vendor owes you</p><div class="list">${rows}</div>
+    <p class="section-f">Credits still missing ${CHASE_DAYS} days after a return are flagged so you can ask the counter about them. Open a vendor to get a list you can send their rep.</p>`;
+  $("sc-vendors").querySelectorAll("[data-vendor]").forEach(b => b.onclick = () => pushVendor(b.dataset.vendor));
+}
+
+/* ---------- navbars ---------- */
+[["sc-returns","nb-returns"],["sc-vendors","nb-vendors"]].forEach(([sc,nb]) => $(sc).addEventListener("scroll", e => $(nb).classList.toggle("scrolled", e.target.scrollTop > 36), {passive:true}));
+
+/* ---------- tabs ---------- */
+let tab = "returns";
+function setTab(t){
+  if(t===tab) return; tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===t));
+  $("p-returns").hidden = t!=="returns"; $("p-vendors").hidden = t!=="vendors";
+  if(t!=="vendors") closePush(true);
+}
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => setTab(b.dataset.tab));
+
+/* ---------- push (in from the right, out to the right) ---------- */
+const pushX = springValue(x => {
+  $("p-push").style.transform = `translateX(${x}px)`;
+  const p = 1 - x/390; $("p-vendors").style.transform = `translateX(${-90*p}px)`; $("p-vendors").style.filter = `brightness(${1-.06*p})`;
+}, 390);
+let pushedVendor = null;
+function pushVendor(k){ pushedVendor = k; renderVendorDoc(); setTab("vendors"); $("p-push").hidden = false; $("sc-push").scrollTop = 0; pushX.to(0, {damping:1, response:.38}); }
+function closePush(instant, velocity){
+  if($("p-push").hidden) return;
+  if(instant){ pushX.set(390); $("p-push").hidden = true; return; }
+  pushX.to(390, {damping:1, response:.36, velocity, onDone:() => $("p-push").hidden = true});
+}
+$("backBtn").onclick = () => closePush(false);
+$("shareBtn").onclick = () => showBanner("Share list", "Sending this to your vendor rep works in the full app.");
+(function edgeSwipe(){ const el = $("edge"), tr = tracker(); let x0=0, start=0, on=false;
+  el.addEventListener("pointerdown", e => { el.setPointerCapture(e.pointerId); on=true; x0=e.clientX; start=pushX.x; pushX.set(pushX.x); tr.reset(); tr.add(e.clientX/scale); });
+  el.addEventListener("pointermove", e => { if(!on) return; tr.add(e.clientX/scale); let x = start + (e.clientX-x0)/scale; if(x<0) x = -rubber(-x,390); pushX.set(Math.min(390,x)); });
+  const end = () => { if(!on) return; on=false; const v = tr.vel(), dest = pushX.x + project(v);
+    if(dest > 195 || v > 600) closePush(false, v); else pushX.to(0, {damping:1, response:.35, velocity:v}); };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+})();
+function renderVendorDoc(){
+  const k = pushedVendor; if(!k) return;
+  const V = VENDORS[k], st = vendorStats(k);
+  $("push-title").textContent = V.name;
+  const sent = st.ps.filter(p => p.status==="sent"), shop = st.ps.filter(p => p.status==="shop"), done = st.ps.filter(p => p.status==="done");
+  const row = (p, meta, flag) => `<div><div class="top"><span>${esc(p.part)} · ${p.kind}</span><span class="num">${money(p.amt)}</span></div><div class="meta">Invoice ${p.inv} · RO ${p.ro} · ${esc(p.car)}</div>${meta?`<div class="meta ${flag?"flag":""}">${meta}</div>`:""}</div>`;
+  const tot = a => money(a.reduce((s,p)=>s+p.amt,0));
+  $("sc-push").innerHTML = `<article class="paper">
+    <div class="ph"><span class="kicker">Credit check</span><h2>${esc(V.name)}</h2><span class="addr">${V.acct} · prepared ${dayLabel(0)}, 2026</span></div>
+    <dl class="facts"><div><dt>Owed to shop</dt><dd>${money(st.owed)}</dd></div><div><dt>Credits missing</dt><dd>${sent.length}</dd></div>
+      <div><dt>Cores to return</dt><dd>${shop.length}</dd></div><div><dt>Credited</dt><dd>${tot(done)}</dd></div></dl>
+    <h4><span>Returned · credit not received</span><span>${tot(sent)}</span></h4>
+    <div class="rows">${sent.map(p => row(p, `Returned ${dayLabel(p.sent)} · ${-p.sent} days ago${chase(p)?" · please check":""}${p.photo?" · signed slip on file":""}`, chase(p))).join("") || `<p class="none">None.</p>`}</div>
+    <h4><span>Still at our shop</span><span>${tot(shop)}</span></h4>
+    <div class="rows">${shop.map(p => row(p, state(p)==="late" ? `Return window ended ${dayLabel(left(p))}` : `Return by ${dayLabel(left(p))}`, state(p)==="late")).join("") || `<p class="none">None.</p>`}</div>
+    <h4><span>Credited</span><span>${tot(done)}</span></h4>
+    <div class="rows">${done.map(p => row(p, `Credit memo ${p.memo} · ${dayLabel(p.credited)}`)).join("") || `<p class="none">None yet.</p>`}</div>
+    <p class="note">Send this to your counter rep to match their credits against yours. List ${fp(k+parts.length)} · all data in this demo is sample data.</p>
+  </article>`;
+}
+
+/* ---------- sheet ---------- */
+const H = 782;
+const sheetY = springValue(y => {
+  $("sheet").style.transform = `translateY(${y}px)`;
+  const p = Math.max(0, Math.min(1, 1 - y/H));
+  $("scrim").style.opacity = p;
+  $("stack").style.transform = `scale(${1 - .07*p}) translateY(${-6*p}px)`;
+  $("stack").style.borderRadius = (p*14)+"px"; $("stack").style.overflow = p>0.01 ? "hidden" : "";
+}, H+20);
+let ctx = null;
+function openSheet(c){ ctx = c; renderSheet(); $("scrim").classList.add("on"); $("sheetBody").scrollTop = 0; sheetY.to(0, {damping:1, response:.38}); }
+function closeSheet(velocity){ $("scrim").classList.remove("on"); sheetY.to(H+20, {damping:1, response:.34, velocity}); }
+$("scrim").onclick = () => closeSheet();
+$("addBtn").onclick = () => openSheet({mode:"new", part:0, vendor:"rid", amt:PART_CHOICES[0][1], ro:"4490"});
+(function dragSheet(){ const el = $("sheetHead"), tr = tracker(); let y0=0, start=0, on=false;
+  el.addEventListener("pointerdown", e => { if(e.target.closest("button")) return; el.setPointerCapture(e.pointerId); on=true; y0=e.clientY; start=sheetY.x; sheetY.set(sheetY.x); tr.reset(); tr.add(e.clientY/scale); });
+  el.addEventListener("pointermove", e => { if(!on) return; tr.add(e.clientY/scale); let y = start + (e.clientY-y0)/scale; if(y<0) y = -rubber(-y, H); sheetY.set(y); });
+  const end = () => { if(!on) return; on=false; const v = tr.vel(), dest = sheetY.x + project(v);
+    if(dest > H*.4) closeSheet(v); else sheetY.to(0, {damping: Math.abs(v)>300 ? .82 : 1, response:.32, velocity:v}); };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+})();
+function swap(fn){
+  const body = $("sheetBody");
+  if(reduced || !body.animate){ fn(); return; }
+  body.animate([{opacity:1,transform:"translateX(0)"},{opacity:0,transform:"translateX(-24px)"}],{duration:120,easing:"ease-in"}).onfinish = () => {
+    fn(); body.animate([{opacity:0,transform:"translateX(24px)"},{opacity:1,transform:"translateX(0)"}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"}); };
+}
+function bar(left, title, right){
+  $("sheetBar").innerHTML = `${left ? `<button class="nav-btn l" id="sbL">${left.label}</button>` : "<span></span>"}<h3>${title}</h3>${right ? `<button class="nav-btn r" id="sbR" ${right.disabled?"disabled":""}>${right.label}</button>` : "<span></span>"}`;
+  if(left) $("sbL").onclick = left.fn; if(right) $("sbR").onclick = right.fn;
+}
+function renderSheet(){
+  if(ctx.mode==="new") return renderNew();
+  const p = parts.find(x => x.id===ctx.id); if(ctx.mode==="return") return renderReturn(p); if(ctx.mode==="credit") return renderCredit(p);
+  const st = state(p), [dt, dc] = dueText(p), V = VENDORS[p.vendor];
+  const pill = {shop:"In the shop", late:"Past return date", sent:"Waiting for credit", done:"Credited"}[st];
+  const step = n => ({shop:1, late:1, sent:2, done:3}[st] >= n ? "on" : "");
+  bar(null, p.kind, {label:"Done", fn:() => closeSheet()});
+  $("sheetBody").innerHTML = `<div class="hero"><h2>${esc(p.part)}</h2><p>${esc(p.car)} · RO ${p.ro}</p><div style="margin-top:6px"><span class="pill ${st}">${pill}</span></div></div>
+    <div class="track"><div class="${step(1)}"><i></i><b>In shop</b>${dayLabel(p.bought)}</div><div class="${step(2)}"><i></i><b>Returned</b>${p.sent!==undefined?dayLabel(p.sent):"—"}</div><div class="${step(3)}"><i></i><b>Credited</b>${p.credited!==undefined?dayLabel(p.credited):"—"}</div></div>
+    <p class="section-h">Details</p>
+    <div class="list plain">
+      <div class="cell"><span></span><span class="t">${p.kind==="Core"?"Core charge":"Credit due"}</span><span class="v num" style="color:var(--label);font-weight:600">${money(p.amt)}</span></div>
+      <div class="cell"><span></span><span class="t">Vendor</span><span class="v">${esc(V.name)}</span></div>
+      <div class="cell"><span></span><span class="t">Invoice</span><span class="v mono" style="font-size:15px">${p.inv}</span></div>
+      <div class="cell"><span></span><span class="t">Return by</span><span class="v ${dc}">${dayLabel(left(p))}</span></div>
+      ${p.memo ? `<div class="cell"><span></span><span class="t">Credit memo</span><span class="v mono" style="font-size:15px">${p.memo}</span></div>` : ""}
+    </div>
+    ${p.photo ? `<p class="section-h">Signed return slip</p><div class="shot" style="cursor:default"><img alt="Signed return slip" src="${p.photo.src}"><span class="tag">${p.photo.t}</span></div>` : ""}
+    <div class="actions">
+      ${st==="shop"||st==="late" ? `<button class="btn fill" id="act">Mark Returned to Vendor</button>` : ""}
+      ${st==="sent" ? `<button class="btn fill" id="act">Mark Credited</button>` : ""}
+      ${st==="done" ? `<p class="section-f" style="margin:0 4px;text-align:center">This one is closed. ${money(p.amt)} came back to your shop.</p>` : ""}
+    </div>
+    <p class="section-f">${st==="late" ? `This core is ${-left(p)} days past the vendor's return window. Some counters still take late cores; return it as soon as you can.` : st==="sent" && chase(p) ? `It's been ${-p.sent} days with no credit. Ask the counter to look up invoice ${p.inv}.` : st==="shop" ? `${dt}. You'll get a reminder 3 days before the deadline.` : ""}</p>`;
+  const a = $("act"); if(a) a.onclick = () => { ctx = {mode: p.status==="sent" ? "credit" : "return", id:p.id, memo:"CM-" + (20900 + Math.floor(Math.random()*90))}; swap(renderSheet); };
+}
+function renderReturn(p){
+  bar({label:"Back", fn:() => { ctx = {mode:"part", id:p.id}; swap(renderSheet); }}, "Return Part", {label:"Save", disabled:!ctx.photo, fn:() => {
+    p.status = "sent"; p.sent = 0; p.photo = ctx.photo; closeSheet(); refresh();
+    showBanner("Marked returned", `${p.part} · ${money(p.amt)} credit now pending`);
+  }});
+  $("sheetBody").innerHTML = `<div class="hero"><h2>${esc(p.part)}</h2><p>Going back to ${esc(VENDORS[p.vendor].name)} · invoice ${p.inv}</p></div>
+    <p class="section-h">Signed return slip</p>
+    <button class="shot" id="shotBtn" aria-label="Photograph the return slip">${ctx.photo ? `<img alt="Signed return slip" src="${ctx.photo.src}"><span class="tag">${ctx.photo.t}</span>` : `${ICON.cam}<span>Photograph the slip</span>`}<span class="flash"></span></button>
+    <p class="section-f">${ctx.photo ? "Slip saved. Tap Save to start tracking the credit." : "Snap the slip the driver signs when they pick up the core. It's your proof the part went back."}</p>`;
+  $("shotBtn").onclick = () => { if(ctx.photo) return;
+    ctx.photo = {src:slip(p.part, VENDORS[p.vendor].name), t:"Today 8:15 AM"};
+    if(!reduced) $("shotBtn").querySelector(".flash").animate([{opacity:.95},{opacity:0}],{duration:260,easing:"ease-out"});
+    setTimeout(renderSheet, reduced ? 0 : 140); };
+}
+function renderCredit(p){
+  bar({label:"Back", fn:() => { ctx = {mode:"part", id:p.id}; swap(renderSheet); }}, "Credit Received", {label:"Save", fn:() => {
+    const m = $("memoIn").value.trim(); if(!m){ $("memoIn").focus(); return; }
+    p.status = "done"; p.credited = 0; p.memo = m; closeSheet(); refresh();
+    try{ navigator.vibrate && navigator.vibrate(12); }catch(e){}
+    showBanner(`${money(p.amt)} recovered`, `${p.part} · ${VENDORS[p.vendor].name}`);
+  }});
+  $("sheetBody").innerHTML = `<div class="hero"><h2>${esc(p.part)}</h2><p>${esc(VENDORS[p.vendor].name)} · invoice ${p.inv}</p></div>
+    <p class="section-h">From the vendor's statement</p>
+    <div class="list plain">
+      <label class="cell" for="memoIn"><span></span><span class="t">Credit memo #</span><input class="field mono" id="memoIn" value="${ctx.memo}" autocomplete="off" style="font-size:16px"></label>
+      <div class="cell"><span></span><span class="t">Amount</span><span class="v num" style="color:var(--label);font-weight:600">${money(p.amt)}</span></div>
+    </div>
+    <p class="section-f">Match the memo number to the line on the vendor's statement. If the amount is short, leave it open and ask the counter.</p>`;
+}
+function renderNew(){
+  const valid = true;
+  bar({label:"Cancel", fn:() => closeSheet()}, "New Core", {label:"Add", fn:() => {
+    const [name] = PART_CHOICES[ctx.part];
+    const p = mk({part:name, kind:"Core", vendor:ctx.vendor, ro:ctx.ro, car:"2021 Toyota RAV4", amt:ctx.amt, bought:0, window:30, status:"shop", inv:(ctx.vendor==="rid"?"R-":ctx.vendor==="key"?"K-":"BC-")+(1190000+seq*13)});
+    parts.push(p); closeSheet(); refresh();
+    showBanner("Core added", `${name} · return by ${dayLabel(30)}`);
+  }});
+  const pr = PART_CHOICES.map(([n,a],i) => `<label class="cell" for="pc${i}"><span></span><span class="t">${n}</span><input type="radio" name="pc" id="pc${i}" value="${i}" ${ctx.part===i?"checked":""}>${ICON.check}</label>`).join("");
+  const vr = Object.keys(VENDORS).map(k => `<label class="cell" for="vc-${k}"><span></span><span class="t">${esc(VENDORS[k].name)}</span><input type="radio" name="vc" id="vc-${k}" value="${k}" ${ctx.vendor===k?"checked":""}>${ICON.check}</label>`).join("");
+  $("sheetBody").innerHTML = `<div class="hero"><h2>Log a core</h2><p>Takes 10 seconds at the parts counter. Sample RO ${ctx.ro} · 2021 Toyota RAV4</p></div>
+    <p class="section-h">Part</p><div class="list plain">${pr}</div>
+    <p class="section-h">Vendor</p><div class="list plain">${vr}</div>
+    <p class="section-h">Core charge</p><div class="list plain"><div class="cell"><span></span><span class="t num" id="amtV">${money(ctx.amt)}</span><span class="stepper"><button id="aM" aria-label="Lower charge">−</button><button id="aP" aria-label="Raise charge">+</button></span></div></div>
+    <p class="section-f">The return deadline is set to 30 days from today. In the full app, the vendor's own return window is used.</p>`;
+  document.querySelectorAll('input[name="pc"]').forEach(r => r.onchange = () => { ctx.part = +r.value; ctx.amt = PART_CHOICES[ctx.part][1]; $("amtV").textContent = money(ctx.amt); });
+  document.querySelectorAll('input[name="vc"]').forEach(r => r.onchange = () => ctx.vendor = r.value);
+  $("aM").onclick = () => { ctx.amt = Math.max(5, ctx.amt - 5); $("amtV").textContent = money(ctx.amt); };
+  $("aP").onclick = () => { ctx.amt += 5; $("amtV").textContent = money(ctx.amt); };
+}
+function refresh(){ renderReturns(); renderVendors(); renderVendorDoc(); }
+
+/* ---------- banner ---------- */
+let bTimer;
+const bannerY = springValue(y => $("banner").style.transform = `translateY(${y}px)`, -160);
+function showBanner(title, text){
+  $("bTitle").textContent = title; $("bText").textContent = text; clearTimeout(bTimer);
+  bannerY.to(0, {damping:.86, response:.42});
+  bTimer = setTimeout(() => bannerY.to(-160, {damping:1, response:.36}), 2600);
+}
+
+refresh();
+})();
+</script>
+</body>
+</html>

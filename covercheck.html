@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>if(location.hash==="#embed")document.documentElement.classList.add("embed")</script>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}html.embed body{background:transparent!important;padding:0!important;overflow:hidden}html.embed .pitch{display:none!important}html.embed .stage{display:block!important}html.embed .device-wrap{margin:0 auto}</style>
+</head>
+<body>
+<title>CoverCheck Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a short pitch column beside a life-size iPhone running CoverCheck; stacks pitch-over-phone on narrow screens */
+:root{
+  --stage:#e7e9ec; --stage-ink:#14171b; --stage-muted:#575f69;
+  --bg:#f2f2f7; --cell:#ffffff; --label:#000000; --label2:rgba(60,60,67,.62); --label3:rgba(60,60,67,.32);
+  --sep:rgba(60,60,67,.24); --fill:rgba(120,120,128,.12); --fill2:rgba(120,120,128,.2);
+  --tint:#4f46c8; --tint-ink:#ffffff; --green:#248a3d; --green-bg:rgba(52,199,89,.16); --amber:#a86400; --amber-bg:rgba(255,159,10,.18);
+  --red:#d70015; --red-bg:rgba(255,59,48,.13); --orange:#ff9f0a;
+  --bar:rgba(249,249,250,.78); --bar-solid:#f9f9fa; --banner:rgba(250,250,252,.86);
+  --scrim:rgba(0,0,0,.32); --paper:#ffffff; --paper-ink:#111418; --paper-muted:#5d6670; --paper-line:#e2e6ea;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --stage:#0c0d10; --stage-ink:#eef0f3; --stage-muted:#9aa3ae;
+  --bg:#000000; --cell:#1c1c1e; --label:#ffffff; --label2:rgba(235,235,245,.62); --label3:rgba(235,235,245,.3);
+  --sep:rgba(84,84,88,.6); --fill:rgba(120,120,128,.24); --fill2:rgba(120,120,128,.34);
+  --tint:#8f88ff; --tint-ink:#ffffff; --green:#30d158; --green-bg:rgba(48,209,88,.18); --amber:#ffd60a; --amber-bg:rgba(255,214,10,.16);
+  --red:#ff453a; --red-bg:rgba(255,69,58,.18);
+  --bar:rgba(22,22,24,.74); --bar-solid:#161618; --banner:rgba(40,40,44,.84); --scrim:rgba(0,0,0,.55); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --stage:#0c0d10; --stage-ink:#eef0f3; --stage-muted:#9aa3ae;
+  --bg:#000000; --cell:#1c1c1e; --label:#ffffff; --label2:rgba(235,235,245,.62); --label3:rgba(235,235,245,.3);
+  --sep:rgba(84,84,88,.6); --fill:rgba(120,120,128,.24); --fill2:rgba(120,120,128,.34);
+  --tint:#8f88ff; --tint-ink:#ffffff; --green:#30d158; --green-bg:rgba(48,209,88,.18); --amber:#ffd60a; --amber-bg:rgba(255,214,10,.16);
+  --red:#ff453a; --red-bg:rgba(255,69,58,.18);
+  --bar:rgba(22,22,24,.74); --bar-solid:#161618; --banner:rgba(40,40,44,.84); --scrim:rgba(0,0,0,.55); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--stage);color:var(--stage-ink);font-family:var(--font);font-size:15px;line-height:1.47;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--tint);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+
+.stage{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,414px);gap:56px;align-items:center}
+@media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr);gap:28px;justify-items:center}}
+.pitch{max-width:440px;display:grid;gap:18px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tint)}
+.pitch h1{margin:0;font-size:clamp(40px,6vw,56px);line-height:1.02;letter-spacing:-.025em;font-weight:700}
+.pitch .lede{margin:0;font-size:19px;line-height:1.42;letter-spacing:-.01em;color:var(--stage-muted)}
+.try{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:t}
+.try li{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;counter-increment:t}
+.try li::before{content:counter(t);width:24px;height:24px;border-radius:50%;background:var(--fill2);display:grid;place-items:center;font-size:13px;font-weight:600}
+.fine{font-size:13px;color:var(--stage-muted);margin:0;max-width:52ch}
+@media (max-width:860px){.pitch{max-width:430px;width:100%}}
+
+.device-wrap{width:414px;max-width:100%;min-height:200px;position:relative}
+.device{width:414px;height:868px;border-radius:66px;padding:12px;transform-origin:top left;position:absolute;top:0;left:0;
+  background:linear-gradient(145deg,#3d4148,#1f2227 40%,#383c43 70%,#16181c);box-shadow:0 0 0 1.5px #0d0e10 inset,0 40px 80px -30px rgba(0,0,0,.55),0 12px 24px -12px rgba(0,0,0,.35)}
+.device::before{content:"";position:absolute;inset:5px;border-radius:61px;background:#050506}
+.screen{position:relative;width:390px;height:844px;border-radius:54px;overflow:hidden;background:var(--bg);color:var(--label);isolation:isolate;font-size:17px;line-height:1.29;letter-spacing:-.022em}
+.island{position:absolute;top:11px;left:50%;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000;z-index:60}
+.statusbar{position:absolute;top:0;left:0;right:0;height:54px;display:flex;justify-content:space-between;align-items:center;padding:4px 34px 0 46px;z-index:55;font-weight:600;font-size:16.5px;pointer-events:none}
+.statusbar .icons{display:flex;gap:6px;align-items:center}
+.homebar{position:absolute;bottom:8px;left:50%;width:139px;height:5px;margin-left:-69.5px;border-radius:3px;background:var(--label);z-index:70;pointer-events:none}
+
+.stack{position:absolute;inset:0;transform-origin:50% 100%;will-change:transform}
+.page{position:absolute;inset:0;background:var(--bg);will-change:transform}
+.scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;padding:98px 16px 110px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.navbar{position:absolute;top:0;left:0;right:0;height:98px;padding-top:54px;z-index:20;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding-inline:8px}
+.navbar::before{content:"";position:absolute;inset:0;background:var(--bar);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);opacity:0;transition:opacity .2s}
+.navbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:.5px;background:var(--sep);opacity:0;transition:opacity .2s}
+.navbar.scrolled::before,.navbar.scrolled::after,.navbar.always::before,.navbar.always::after{opacity:1}
+.navbar>*{position:relative}
+.nav-title{grid-column:2;font-weight:600;font-size:17px;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.navbar.scrolled .nav-title,.navbar.always .nav-title{opacity:1}
+.nav-btn{color:var(--tint);font-size:17px;display:flex;align-items:center;gap:2px;padding:8px;border-radius:8px}
+.nav-btn:active{opacity:.4}
+.nav-btn:disabled{opacity:.35}
+.nav-plus{grid-column:3;justify-self:end;width:36px;height:36px;border-radius:50%;background:var(--fill);color:var(--tint);display:grid;place-items:center}
+.nav-plus:active{transform:scale(.92)}
+.large-title{margin:4px 4px 14px;font-size:34px;line-height:1.2;font-weight:700;letter-spacing:-.03em}
+
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:83px;padding-bottom:34px;z-index:30;display:grid;grid-template-columns:1fr 1fr}
+.tabbar::before{content:"";position:absolute;inset:0;background:var(--bar);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--sep)}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:500;letter-spacing:.01em;color:var(--label3)}
+.tab[aria-selected="true"]{color:var(--tint)}
+.tab svg{width:26px;height:26px}
+
+.card{background:var(--cell);border-radius:14px;padding:16px}
+.money-card .k{font-size:13px;font-weight:600;color:var(--label2);letter-spacing:-.005em}
+.money-card .big{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin:2px 0 2px}
+.money-card .sub{font-size:14px;color:var(--label2);margin:0 0 14px}
+.seg{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;background:var(--fill)}
+.seg i{display:block;transition:flex-grow .45s cubic-bezier(.2,.8,.2,1)}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;gap:8px}
+.legend b{display:block;font-size:19px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.legend span{font-size:12px;color:var(--label2);letter-spacing:0;line-height:1.25;display:block}
+.alert{display:flex;gap:10px;align-items:center;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--red-bg);color:var(--red);font-size:15px;font-weight:600;letter-spacing:-.012em}
+.alert svg{flex:none}
+.section-h{margin:24px 16px 7px;font-size:13px;line-height:1.3;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
+.section-f{margin:7px 16px 0;font-size:13px;line-height:1.35;color:var(--label2);letter-spacing:-.005em}
+.list{background:var(--cell);border-radius:12px;overflow:hidden}
+.cell{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 16px;text-align:left;position:relative;min-height:44px}
+.cell+.cell::before{content:"";position:absolute;top:0;right:0;left:60px;height:.5px;background:var(--sep)}
+.list.plain .cell+.cell::before{left:16px}
+button.cell:active,label.cell:active{background:var(--fill2)}
+.cell .t{font-size:17px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .s{font-size:14px;line-height:1.3;color:var(--label2);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .v{color:var(--label2);font-size:17px;text-align:right}
+.cell .amt{font-size:17px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.cell .due{font-size:12px;font-weight:600;text-align:right}
+.trail{display:flex;align-items:center;gap:8px}
+.chev{color:var(--label3);width:9px;height:15px;flex:none}
+.dot{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#fff}
+.dot svg{width:18px;height:18px}
+.dot.shop{background:#8e8e93} .dot.late{background:var(--red)} .dot.sent{background:var(--orange)} .dot.done{background:var(--green)} .dot.vend{background:var(--tint)}
+.pill{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;letter-spacing:-.005em}
+.pill.shop{background:var(--fill2);color:var(--label)} .pill.late{background:var(--red-bg);color:var(--red)} .pill.sent{background:var(--amber-bg);color:var(--amber)} .pill.done{background:var(--green-bg);color:var(--green)}
+.c-red{color:var(--red)} .c-amber{color:var(--amber)} .c-muted{color:var(--label2)} .c-green{color:var(--green)}
+
+.btn{width:100%;height:50px;border-radius:14px;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s ease-out,opacity .1s}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn.fill{background:var(--tint);color:var(--tint-ink)}
+.btn.gray{background:var(--fill);color:var(--tint)}
+.btn:disabled{opacity:.35;transform:none;cursor:default}
+
+.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;z-index:40;pointer-events:none}
+.scrim.on{pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:782px;z-index:45;background:var(--bg);border-radius:12px 12px 0 0;transform:translateY(800px);will-change:transform;display:flex;flex-direction:column;box-shadow:0 -6px 30px rgba(0,0,0,.12)}
+.sheet-head{flex:none;touch-action:none;padding:6px 8px 0;cursor:grab}
+.grabber{width:36px;height:5px;border-radius:3px;background:var(--label3);margin:0 auto 4px}
+.sheet-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:44px}
+.sheet-bar h3{margin:0;font-size:17px;font-weight:600;grid-column:2}
+.sheet-bar .r{justify-self:end;font-weight:600}
+.sheet-bar .l{justify-self:start}
+.sheet-body{flex:1;overflow-y:auto;padding:4px 16px 50px;scrollbar-width:none}
+.sheet-body::-webkit-scrollbar{display:none}
+.hero{padding:6px 4px 16px;display:grid;gap:5px}
+.hero h2{margin:0;font-size:28px;line-height:1.14;font-weight:700;letter-spacing:-.028em}
+.hero p{margin:0;color:var(--label2);font-size:15px;letter-spacing:-.012em}
+.actions{display:grid;gap:10px;margin-top:22px}
+
+/* status track */
+.track{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+.track div{display:grid;gap:6px;font-size:12px;color:var(--label2);letter-spacing:-.005em;line-height:1.25}
+.track i{display:block;height:4px;border-radius:2px;background:var(--fill2)}
+.track .on i{background:var(--tint)} .track .on{color:var(--label)}
+.track b{font-weight:600;font-size:13px}
+
+.shot{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;background:var(--cell);display:grid;place-items:center;gap:4px;overflow:hidden;color:var(--tint);font-size:15px;font-weight:600;transition:transform .1s ease-out}
+.shot:active{transform:scale(.97)}
+.shot svg{width:28px;height:28px}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.shot .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.shot .tag{position:absolute;left:8px;top:8px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff}
+.field{width:100%;border:0;background:transparent;font-size:17px;text-align:right;color:var(--label);outline:none;min-width:0;letter-spacing:-.02em}
+.stepper{display:flex;background:var(--fill);border-radius:9px;overflow:hidden;flex:none}
+.stepper button{width:47px;height:32px;display:grid;place-items:center;font-size:22px;line-height:1;color:var(--label)}
+.stepper button:active{background:var(--fill2)}
+.stepper button+button{border-left:.5px solid var(--sep)}
+.radio{width:22px;height:22px;color:var(--tint);visibility:hidden}
+input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+input[type=radio]:checked~.radio{visibility:visible}
+label.cell{cursor:pointer}
+
+.paper{background:var(--paper);color:var(--paper-ink);border-radius:14px;padding:20px 18px;letter-spacing:-.01em;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.paper .ph{border-bottom:2px solid var(--paper-ink);padding-bottom:10px;display:grid;gap:2px}
+.paper .kicker{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--paper-muted)}
+.paper h2{margin:0;font-size:22px;line-height:1.15;font-weight:700;letter-spacing:-.025em}
+.paper .addr{font-size:13px;color:var(--paper-muted)}
+.paper h4{margin:18px 0 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--paper-muted);display:flex;justify-content:space-between}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:12px;font-size:13px}
+.facts dt{font-size:11px;color:var(--paper-muted);text-transform:uppercase;letter-spacing:.06em} .facts dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.rows{display:grid;font-size:13px}
+.rows>div{display:grid;gap:2px;padding:8px 0;border-bottom:1px solid var(--paper-line)}
+.rows .top{display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.rows .meta{color:var(--paper-muted);font-size:12px}
+.rows .flag{color:#c4000f;font-weight:600}
+.paper .none{font-size:13px;color:var(--paper-muted);margin:0}
+.paper .note{margin:16px 0 0;padding-top:10px;border-top:1px solid var(--paper-line);font-size:11px;line-height:1.4;color:var(--paper-muted)}
+
+.banner{position:absolute;top:54px;left:10px;right:10px;z-index:58;border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;
+  background:var(--banner);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:0 10px 30px rgba(0,0,0,.18);transform:translateY(-160px);will-change:transform}
+.banner .ico{width:38px;height:38px;border-radius:9px;background:var(--tint);display:grid;place-items:center;flex:none}
+.banner b{display:block;font-size:15px;font-weight:600;letter-spacing:-.015em}
+.banner span{font-size:14px;color:var(--label2);letter-spacing:-.01em}
+
+@media (prefers-reduced-transparency:reduce){
+  .navbar::before,.tabbar::before{background:var(--bar-solid);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .banner{background:var(--cell);backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media (prefers-reduced-motion:reduce){.seg i{transition:none}}
+/* CoverCheck additions */
+.pol{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center}
+.ok-ic,.bad-ic,.warn-ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}
+.ok-ic{background:var(--green)} .bad-ic{background:var(--red)} .warn-ic{background:var(--orange)}
+.ok-ic svg,.bad-ic svg,.warn-ic svg{width:13px;height:13px}
+.bubble{background:var(--cell);border-radius:18px;padding:14px 16px;font-size:16px;line-height:1.38;letter-spacing:-.015em}
+.bubble .to{font-size:13px;color:var(--label2);margin-bottom:6px}
+.bubble a{color:var(--tint);text-decoration:none}
+.cert{width:100%;aspect-ratio:8.5/6.2;border-radius:10px;display:block;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.grid-tbl{display:grid;grid-template-columns:minmax(0,1fr) repeat(4,28px);gap:0 6px;font-size:12px;align-items:center}
+.grid-tbl>span{padding:7px 0;border-bottom:1px solid var(--paper-line)}
+.grid-tbl .h{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--paper-muted);text-align:center}
+.grid-tbl .h:first-child{text-align:left}
+.grid-tbl .m{text-align:center;font-weight:700}
+.m.ok{color:#1d7a35} .m.soon{color:#a86400} .m.bad{color:#c4000f}
+.req{display:grid;gap:4px;font-size:13px}
+.req div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--paper-line)}
+.req div span:last-child{font-weight:600}
+</style>
+
+<main class="stage">
+  <section class="pitch">
+    <span class="eyebrow">Demo · sample data only</span>
+    <h1>CoverCheck</h1>
+    <p class="lede">Know which subcontractors are covered before they step on your job site. CoverCheck tracks every sub's insurance certificate, warns you 30 days before a policy expires, and chases them for the new one so you don't have to.</p>
+    <ol class="try">
+      <li><span>Tap <b>Bluestem Plumbing</b>. Their liability policy already expired.</span></li>
+      <li><span>Tap <b>Request New Certificate</b> and send it. Then tap <b>Review New Certificate</b> to see what happens when they upload it, and approve it.</span></li>
+      <li><span>Open <b>Projects</b> for a coverage report on each job, ready to show an owner or your insurance auditor.</span></li>
+    </ol>
+    <p class="fine">Every company, policy, carrier and project here is made up. Nothing is actually sent. CoverCheck checks dates and limits against your requirements; it does not replace review by your insurance agent.</p>
+    <p class="fine">Want to try it on your jobs? Reply to the email Hassanur sent you.</p>
+  </section>
+
+  <div class="device-wrap" id="wrap">
+    <div class="device" id="device">
+      <div class="screen" id="screen">
+        <div class="island"></div>
+        <div class="statusbar"><span id="clock">7:42</span>
+          <span class="icons" aria-hidden="true">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.6c2.2 0 4.2.9 5.7 2.3l1.1-1.1A9.7 9.7 0 0 0 8 1 9.7 9.7 0 0 0 1.2 3.8l1.1 1.1A8.1 8.1 0 0 1 8 2.6zm0 3.2c1.3 0 2.5.5 3.4 1.3l1.1-1.1A6.4 6.4 0 0 0 8 4.2c-1.7 0-3.3.7-4.5 1.8l1.1 1.1C5.5 6.3 6.7 5.8 8 5.8zm0 3.2c-.5 0-.9.2-1.2.5L8 10.7l1.2-1.2C8.9 9.2 8.5 9 8 9z"/></svg>
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2z" fill="currentColor" opacity=".45"/></svg>
+          </span></div>
+
+        <div class="stack" id="stack">
+          <div class="page" id="p-subs">
+            <header class="navbar" id="nb-subs"><span class="nav-title">Subs</span></header>
+            <div class="scroll" id="sc-subs"></div>
+          </div>
+          <div class="page" id="p-projects" hidden>
+            <header class="navbar" id="nb-projects"><span class="nav-title">Projects</span></header>
+            <div class="scroll" id="sc-projects"></div>
+          </div>
+          <div class="page" id="p-push" style="transform:translateX(390px);z-index:25;box-shadow:-8px 0 24px rgba(0,0,0,.12)" hidden>
+            <header class="navbar always">
+              <button class="nav-btn" id="backBtn" style="justify-self:start"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>Projects</button>
+              <span class="nav-title" id="push-title"></span>
+              <button class="nav-btn" id="shareBtn" style="justify-self:end" aria-label="Share report"><svg width="20" height="24" viewBox="0 0 20 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15V2M5.5 6.5 10 2l4.5 4.5M6 10H3.5a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 3.5 22h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 16.5 10H14"/></svg></button>
+            </header>
+            <div class="scroll" id="sc-push"></div>
+            <div id="edge" style="position:absolute;left:0;top:98px;bottom:0;width:22px;z-index:21;touch-action:none"></div>
+          </div>
+          <nav class="tabbar" role="tablist">
+            <button class="tab" role="tab" aria-selected="true" data-tab="subs">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V6z"/><path d="M9.5 13l2.5 2.5 4.5-5"/></svg>Subs</button>
+            <button class="tab" role="tab" aria-selected="false" data-tab="projects">
+              <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 22.5h20M5 22.5V10l8-5.5 8 5.5v12.5"/><path d="M10 22.5v-6h6v6" stroke-linecap="round"/></svg>Projects</button>
+          </nav>
+        </div>
+
+        <div class="scrim" id="scrim"></div>
+        <section class="sheet" id="sheet" aria-modal="true" role="dialog" aria-label="Subcontractor">
+          <div class="sheet-head" id="sheetHead"><div class="grabber"></div><div class="sheet-bar" id="sheetBar"></div></div>
+          <div class="sheet-body" id="sheetBody"></div>
+        </section>
+
+        <div class="banner" id="banner" aria-live="polite"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div><b id="bTitle"></b><span id="bText"></span></div></div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- spring (damping ratio + response; interruptible; carries velocity) ---------- */
+function springValue(apply, initial){
+  const s = {x:initial, v:0, target:initial, raf:0, z:1, r:.4, done:null};
+  function loop(now){
+    const dt = Math.min(.034, (now - s.last)/1000); s.last = now;
+    const k = Math.pow(2*Math.PI/s.r, 2), c = 4*Math.PI*s.z/s.r, n = 4, h = dt/n;
+    for(let i=0;i<n;i++){ const a = -k*(s.x - s.target) - c*s.v; s.v += a*h; s.x += s.v*h; }
+    apply(s.x);
+    if(Math.abs(s.v) < 4 && Math.abs(s.x - s.target) < .4){ s.x = s.target; s.v = 0; apply(s.x); s.raf = 0; const d = s.done; s.done = null; d && d(); }
+    else s.raf = requestAnimationFrame(loop);
+  }
+  s.to = (target, o = {}) => {
+    s.target = target; s.z = o.damping ?? 1; s.r = o.response ?? .4; s.done = o.onDone || null;
+    if(o.velocity !== undefined) s.v = o.velocity;
+    if(reduced){ cancelAnimationFrame(s.raf); s.raf = 0; s.x = target; s.v = 0; apply(target); const d = s.done; s.done = null; d && d(); return; }
+    if(!s.raf){ s.last = performance.now(); s.raf = requestAnimationFrame(loop); }
+  };
+  s.set = x => { cancelAnimationFrame(s.raf); s.raf = 0; s.x = x; s.v = 0; apply(x); };
+  apply(initial); return s;
+}
+const project = (v, d = .998) => (v/1000) * d / (1 - d);
+const rubber = (o, dim, c = .55) => (o * dim * c) / (dim + c * Math.abs(o));
+function tracker(){ const h=[]; return { add(p){ const t=performance.now(); h.push([p,t]); while(h.length>1 && t-h[0][1]>90) h.shift(); },
+  vel(){ if(h.length<2) return 0; const [p0,t0]=h[0],[p1,t1]=h[h.length-1]; return t1>t0 ? (p1-p0)/((t1-t0)/1000) : 0; }, reset(){h.length=0} }; }
+
+/* ---------- device scaling ---------- */
+let scale = 1;
+function fit(){
+  const w = $("wrap").clientWidth || Math.min(414, document.documentElement.clientWidth - 32);
+  const hFit = (window.innerHeight - 48) / 868;
+  scale = Math.max(.3, Math.min(1, w/414, hFit > .5 ? hFit : 1));
+  const d = $("device"); d.style.transform = `scale(${scale})`; d.style.left = Math.max(0, (w - 414*scale)/2) + "px";
+  $("wrap").style.height = (868*scale) + "px";
+}
+new ResizeObserver(fit).observe($("wrap")); window.addEventListener("resize", fit); fit();
+
+/* ---------- requirements + sample data (dates are days from today) ---------- */
+const REQ = {glOcc:1000000, glAgg:2000000, auto:1000000, soon:30};
+const POL = [["gl","General liability"],["wc","Workers' comp"],["auto","Commercial auto"],["ai","Additional insured"]];
+const subs = [
+  {id:"s1", name:"Bluestem Plumbing", trade:"Plumbing", contact:"Office (sample)", carrier:"Granite Mutual (sample)", gl:{exp:-5,occ:1e6,agg:2e6}, wc:{exp:140}, auto:{exp:200}, ai:true},
+  {id:"s2", name:"Cardinal Drywall", trade:"Drywall", contact:"Owner (sample)", carrier:"Harbor Casualty (sample)", gl:{exp:190,occ:1e6,agg:2e6}, wc:null, auto:{exp:190}, ai:true},
+  {id:"s3", name:"Summit Roofing", trade:"Roofing", contact:"Office (sample)", carrier:"Northfield Indemnity (sample)", gl:{exp:240,occ:5e5,agg:1e6}, wc:{exp:240}, auto:{exp:240}, ai:true},
+  {id:"s4", name:"Ironwood Framing", trade:"Framing", contact:"Owner (sample)", carrier:"Granite Mutual (sample)", gl:{exp:12,occ:1e6,agg:2e6}, wc:{exp:12}, auto:{exp:160}, ai:true},
+  {id:"s5", name:"Prairie HVAC", trade:"HVAC", contact:"Office (sample)", carrier:"Harbor Casualty (sample)", gl:{exp:300,occ:2e6,agg:4e6}, wc:{exp:300}, auto:{exp:25}, ai:true},
+  {id:"s6", name:"Northline Electric", trade:"Electrical", contact:"Office (sample)", carrier:"Lakeshore Insurance (sample)", gl:{exp:133,occ:1e6,agg:2e6}, wc:{exp:90}, auto:{exp:133}, ai:true},
+  {id:"s7", name:"Lakeside Concrete", trade:"Concrete", contact:"Owner (sample)", carrier:"Granite Mutual (sample)", gl:{exp:211,occ:1e6,agg:2e6}, wc:{exp:211}, auto:{exp:211}, ai:true},
+  {id:"s8", name:"Twin Pines Painting", trade:"Painting", contact:"Owner (sample)", carrier:"Lakeshore Insurance (sample)", gl:{exp:98,occ:1e6,agg:2e6}, wc:{exp:98}, auto:{exp:98}, ai:true},
+  {id:"s9", name:"Granite Tile Co.", trade:"Tile", contact:"Office (sample)", carrier:"Harbor Casualty (sample)", gl:{exp:275,occ:1e6,agg:2e6}, wc:{exp:275}, auto:{exp:275}, ai:true},
+  {id:"s10", name:"Riverbend Excavating", trade:"Excavation", contact:"Office (sample)", carrier:"Northfield Indemnity (sample)", gl:{exp:180,occ:2e6,agg:4e6}, wc:{exp:180}, auto:{exp:180}, ai:true}
+];
+const projects = [
+  {id:"j1", name:"Elm Street Kitchen Remodel", short:"Elm Street Kitchen", where:"Apple Valley (sample)", owner:"Homeowner (sample)", subs:["s1","s6","s8","s2"], week:["s1","s6"]},
+  {id:"j2", name:"Cedar Avenue Retail Buildout", short:"Cedar Ave Retail", where:"Eagan (sample)", owner:"Property manager (sample)", subs:["s6","s5","s3","s9","s7"], week:["s5","s9"]},
+  {id:"j3", name:"Oak Hollow New Home", short:"Oak Hollow Home", where:"Lakeville (sample)", owner:"Homeowner (sample)", subs:["s10","s4","s3","s2","s8"], week:["s4","s2","s10"]}
+];
+const sub = id => subs.find(s => s.id===id);
+const dayLabel = d => { const t = new Date(2026,10,2); t.setDate(t.getDate()+d); return t.toLocaleDateString("en-US",{month:"short",day:"numeric",year: d>59 ? "numeric" : undefined}); };
+const money = n => n>=1e6 ? "$"+(n/1e6)+"M" : "$"+(n/1e3)+"K";
+const fp = s => { let h=2166136261; for(const c of s){h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return (h>>>0).toString(16).padStart(8,"0"); };
+
+/* policy check → {k, st:"ok"|"soon"|"bad", why} */
+function checks(s){
+  const out = [];
+  const g = s.gl;
+  if(!g) out.push({k:"gl", st:"bad", why:"No certificate on file"});
+  else if(g.exp < 0) out.push({k:"gl", st:"bad", why:`Expired ${dayLabel(g.exp)}`});
+  else if(g.occ < REQ.glOcc || g.agg < REQ.glAgg) out.push({k:"gl", st:"bad", why:`${money(g.occ)} / ${money(g.agg)} · you require ${money(REQ.glOcc)} / ${money(REQ.glAgg)}`});
+  else out.push({k:"gl", st: g.exp <= REQ.soon ? "soon" : "ok", why:`${money(g.occ)} / ${money(g.agg)} · expires ${dayLabel(g.exp)}`});
+  [["wc","Statutory"],["auto",money(REQ.auto)]].forEach(([k,lim]) => { const p = s[k];
+    if(!p) out.push({k, st:"bad", why:"No certificate on file"});
+    else if(p.exp < 0) out.push({k, st:"bad", why:`Expired ${dayLabel(p.exp)}`});
+    else out.push({k, st: p.exp <= REQ.soon ? "soon" : "ok", why:`${lim} · expires ${dayLabel(p.exp)}`}); });
+  out.push({k:"ai", st: s.ai ? "ok" : "bad", why: s.ai ? "Your company is listed" : "Not listed on certificate"});
+  return out;
+}
+function status(s){ const c = checks(s); return c.some(x=>x.st==="bad") ? "bad" : c.some(x=>x.st==="soon") ? "soon" : "ok"; }
+function headline(s){
+  const c = checks(s), bad = c.find(x=>x.st==="bad"), soon = c.filter(x=>x.st==="soon");
+  const label = Object.fromEntries(POL);
+  if(bad){ const w = bad.why.startsWith("$") ? `limit below ${money(REQ.glOcc)}` : bad.why.charAt(0).toLowerCase() + bad.why.slice(1);
+    return [`${label[bad.k]}: ${w}`, "c-red"]; }
+  if(soon.length){ const d = Math.min(...soon.map(x => s[x.k].exp)); return [`${label[soon[0].k]} expires in ${d} days`, "c-amber"]; }
+  return ["Covered", "c-green"];
+}
+const ICON = {
+  ok:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`,
+  soon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>`,
+  bad:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>`,
+  job:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-5 7 5v11"/></svg>`,
+  chev:`<svg class="chev" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5l6 6-6 6"/></svg>`
+};
+const DOT = {ok:"done", soon:"sent", bad:"late"};
+const IC = {ok:"ok-ic", soon:"warn-ic", bad:"bad-ic"};
+
+/* ---------- Subs tab ---------- */
+function subCell(s){
+  const st = status(s), [h, hc] = headline(s);
+  return `<button class="cell" data-sub="${s.id}"><span class="dot ${DOT[st]}">${ICON[st]}</span>
+    <span style="min-width:0"><div class="t">${esc(s.name)}</div><div class="s ${hc}">${esc(h)}</div></span>
+    <span class="trail">${s.requested && st!=="ok" ? `<span class="due c-muted">Requested</span>` : ""}${ICON.chev}</span></button>`;
+}
+function renderSubs(){
+  const g = {ok:[], soon:[], bad:[]}; subs.forEach(s => g[status(s)].push(s));
+  const onSiteBad = [...new Set(projects.flatMap(p => p.week))].filter(id => status(sub(id))==="bad");
+  $("sc-subs").innerHTML = `<h1 class="large-title">Subs</h1>
+    <div class="card money-card"><div class="k">Cleared to work today</div><div class="big num">${g.ok.length + g.soon.length} <span style="font-size:22px;color:var(--label2);font-weight:600">of ${subs.length}</span></div>
+      <p class="sub">Checked against your limits: GL ${money(REQ.glOcc)} / ${money(REQ.glAgg)}, auto ${money(REQ.auto)}, workers' comp, you as additional insured</p>
+      <div class="seg"><i style="flex-grow:${g.ok.length};background:var(--green)"></i><i style="flex-grow:${g.soon.length};background:var(--orange)"></i><i style="flex-grow:${g.bad.length};background:var(--red)"></i></div>
+      <div class="legend"><div><b class="num c-green">${g.ok.length}</b><span>Covered</span></div><div><b class="num c-amber">${g.soon.length}</b><span>Expiring in 30 days</span></div><div><b class="num" style="color:var(--red)">${g.bad.length}</b><span>Not covered</span></div></div>
+      ${onSiteBad.length ? `<div class="alert"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.2"/></svg>${onSiteBad.length} not-covered sub${onSiteBad.length>1?"s are":" is"} scheduled on a job this week</div>` : ""}
+    </div>
+    ${g.bad.length ? `<p class="section-h">Not covered · ${g.bad.length}</p><div class="list">${g.bad.map(subCell).join("")}</div>` : ""}
+    ${g.soon.length ? `<p class="section-h">Expiring soon · ${g.soon.length}</p><div class="list">${g.soon.map(subCell).join("")}</div>` : ""}
+    <p class="section-h">Covered · ${g.ok.length}</p><div class="list">${g.ok.map(subCell).join("")}</div>
+    <p class="section-f">All companies, carriers and policies are sample data.</p>`;
+  $("sc-subs").querySelectorAll("[data-sub]").forEach(b => b.onclick = () => openSheet({mode:"sub", id:b.dataset.sub}));
+}
+
+/* ---------- Projects tab ---------- */
+function renderProjects(){
+  const rows = projects.map(p => { const bad = p.subs.filter(id => status(sub(id))==="bad").length, weekBad = p.week.filter(id => status(sub(id))==="bad").length;
+    return `<button class="cell" data-job="${p.id}"><span class="dot vend">${ICON.job}</span>
+      <span style="min-width:0"><div class="t">${esc(p.name)}</div><div class="s ${weekBad?"c-red":bad?"c-amber":""}">${weekBad ? `${weekBad} not covered on site this week` : bad ? `${bad} of ${p.subs.length} subs not covered` : `All ${p.subs.length} subs covered`}</div></span>
+      ${ICON.chev}</button>`; }).join("");
+  $("sc-projects").innerHTML = `<h1 class="large-title">Projects</h1>
+    <p class="section-h" style="margin-top:4px">Active jobs</p><div class="list">${rows}</div>
+    <p class="section-f">Each job has a coverage report you can hand to the owner, a lender, or your insurance company's auditor.</p>`;
+  $("sc-projects").querySelectorAll("[data-job]").forEach(b => b.onclick = () => pushJob(b.dataset.job));
+}
+
+[["sc-subs","nb-subs"],["sc-projects","nb-projects"]].forEach(([sc,nb]) => $(sc).addEventListener("scroll", e => $(nb).classList.toggle("scrolled", e.target.scrollTop > 36), {passive:true}));
+
+/* ---------- tabs ---------- */
+let tab = "subs";
+function setTab(t){
+  if(t===tab) return; tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===t));
+  $("p-subs").hidden = t!=="subs"; $("p-projects").hidden = t!=="projects";
+  if(t!=="projects") closePush(true);
+}
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => setTab(b.dataset.tab));
+
+/* ---------- push (in from the right, out to the right) ---------- */
+const pushX = springValue(x => {
+  $("p-push").style.transform = `translateX(${x}px)`;
+  const p = 1 - x/390; $("p-projects").style.transform = `translateX(${-90*p}px)`; $("p-projects").style.filter = `brightness(${1-.06*p})`;
+}, 390);
+let pushed = null;
+function pushJob(id){ pushed = id; renderJob(); setTab("projects"); $("p-push").hidden = false; $("sc-push").scrollTop = 0; pushX.to(0, {damping:1, response:.38}); }
+function closePush(instant, velocity){
+  if($("p-push").hidden) return;
+  if(instant){ pushX.set(390); $("p-push").hidden = true; return; }
+  pushX.to(390, {damping:1, response:.36, velocity, onDone:() => $("p-push").hidden = true});
+}
+$("backBtn").onclick = () => closePush(false);
+$("shareBtn").onclick = () => showBanner("Share report", "Exporting the report works in the full app.");
+(function edgeSwipe(){ const el = $("edge"), tr = tracker(); let x0=0, start=0, on=false;
+  el.addEventListener("pointerdown", e => { el.setPointerCapture(e.pointerId); on=true; x0=e.clientX; start=pushX.x; pushX.set(pushX.x); tr.reset(); tr.add(e.clientX/scale); });
+  el.addEventListener("pointermove", e => { if(!on) return; tr.add(e.clientX/scale); let x = start + (e.clientX-x0)/scale; if(x<0) x = -rubber(-x,390); pushX.set(Math.min(390,x)); });
+  const end = () => { if(!on) return; on=false; const v = tr.vel(), dest = pushX.x + project(v);
+    if(dest > 195 || v > 600) closePush(false, v); else pushX.to(0, {damping:1, response:.35, velocity:v}); };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+})();
+function renderJob(){
+  const p = projects.find(x => x.id===pushed); if(!p) return;
+  $("push-title").textContent = p.short;
+  const mark = {ok:"✓", soon:"!", bad:"✕"};
+  const grid = `<span class="h">Subcontractor</span><span class="h">GL</span><span class="h">WC</span><span class="h">Auto</span><span class="h">AI</span>` +
+    p.subs.map(id => { const s = sub(id), c = checks(s); return `<span><b>${esc(s.name)}</b><br><span style="color:var(--paper-muted)">${s.trade}${p.week.includes(id)?" · on site this week":""}</span></span>` +
+      c.map(x => `<span class="m ${x.st}" title="${esc(x.why)}">${mark[x.st]}</span>`).join(""); }).join("");
+  const problems = p.subs.map(sub).flatMap(s => checks(s).filter(x => x.st!=="ok").map(x => ({s, x})));
+  const label = Object.fromEntries(POL);
+  $("sc-push").innerHTML = `<article class="paper">
+    <div class="ph"><span class="kicker">Subcontractor coverage report</span><h2>${esc(p.name)}</h2><span class="addr">${esc(p.where)} · for ${esc(p.owner)} · ${dayLabel(0)}, 2026</span></div>
+    <dl class="facts"><div><dt>Subs on job</dt><dd>${p.subs.length}</dd></div><div><dt>Fully covered</dt><dd>${p.subs.filter(id => status(sub(id))!=="bad").length}</dd></div>
+      <div><dt>Not covered</dt><dd>${p.subs.filter(id => status(sub(id))==="bad").length}</dd></div><div><dt>Expiring ≤30 days</dt><dd>${p.subs.filter(id => status(sub(id))==="soon").length}</dd></div></dl>
+    <h4><span>Coverage by policy</span><span>✓ ok · ! expiring · ✕ missing</span></h4>
+    <div class="grid-tbl">${grid}</div>
+    <h4><span>Open issues</span><span>${problems.length}</span></h4>
+    <div class="rows">${problems.map(({s,x}) => `<div><div class="top"><span>${esc(s.name)}</span><span class="${x.st==="bad"?"flag":""}" style="${x.st==="soon"?"color:#a86400":""}">${label[x.k]}</span></div><div class="meta">${esc(x.why)}${s.requested?" · new certificate requested":""}</div></div>`).join("") || `<p class="none">None. Every sub on this job is covered.</p>`}</div>
+    <h4><span>Requirements for this job</span></h4>
+    <div class="req"><div><span>General liability</span><span>${money(REQ.glOcc)} each / ${money(REQ.glAgg)} total</span></div><div><span>Workers' comp</span><span>Statutory</span></div><div><span>Commercial auto</span><span>${money(REQ.auto)}</span></div><div><span>Additional insured</span><span>Required</span></div></div>
+    <p class="note">Report ${fp(p.id+subs.map(status).join(""))}. Checks dates and limits from certificates on file; it does not confirm policy terms with the carrier. Sample data.</p>
+  </article>`;
+}
+
+/* ---------- sheet ---------- */
+const H = 782;
+const sheetY = springValue(y => {
+  $("sheet").style.transform = `translateY(${y}px)`;
+  const p = Math.max(0, Math.min(1, 1 - y/H));
+  $("scrim").style.opacity = p;
+  $("stack").style.transform = `scale(${1 - .07*p}) translateY(${-6*p}px)`;
+  $("stack").style.borderRadius = (p*14)+"px"; $("stack").style.overflow = p>0.01 ? "hidden" : "";
+}, H+20);
+let ctx = null;
+function openSheet(c){ ctx = c; renderSheet(); $("scrim").classList.add("on"); $("sheetBody").scrollTop = 0; sheetY.to(0, {damping:1, response:.38}); }
+function closeSheet(velocity){ $("scrim").classList.remove("on"); sheetY.to(H+20, {damping:1, response:.34, velocity}); }
+$("scrim").onclick = () => closeSheet();
+(function dragSheet(){ const el = $("sheetHead"), tr = tracker(); let y0=0, start=0, on=false;
+  el.addEventListener("pointerdown", e => { if(e.target.closest("button")) return; el.setPointerCapture(e.pointerId); on=true; y0=e.clientY; start=sheetY.x; sheetY.set(sheetY.x); tr.reset(); tr.add(e.clientY/scale); });
+  el.addEventListener("pointermove", e => { if(!on) return; tr.add(e.clientY/scale); let y = start + (e.clientY-y0)/scale; if(y<0) y = -rubber(-y, H); sheetY.set(y); });
+  const end = () => { if(!on) return; on=false; const v = tr.vel(), dest = sheetY.x + project(v);
+    if(dest > H*.4) closeSheet(v); else sheetY.to(0, {damping: Math.abs(v)>300 ? .82 : 1, response:.32, velocity:v}); };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+})();
+function swap(fn){
+  const body = $("sheetBody");
+  if(reduced || !body.animate){ fn(); return; }
+  body.animate([{opacity:1,transform:"translateX(0)"},{opacity:0,transform:"translateX(-24px)"}],{duration:120,easing:"ease-in"}).onfinish = () => {
+    fn(); $("sheetBody").scrollTop = 0; body.animate([{opacity:0,transform:"translateX(24px)"},{opacity:1,transform:"translateX(0)"}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"}); };
+}
+function bar(left, title, right){
+  $("sheetBar").innerHTML = `${left ? `<button class="nav-btn l" id="sbL">${left.label}</button>` : "<span></span>"}<h3>${title}</h3>${right ? `<button class="nav-btn r" id="sbR">${right.label}</button>` : "<span></span>"}`;
+  if(left) $("sbL").onclick = left.fn;
+  if(right) $("sbR").onclick = right.fn;
+}
+function renderSheet(){
+  const s = sub(ctx.id);
+  if(ctx.mode==="request") return renderRequest(s);
+  if(ctx.mode==="review") return renderReview(s);
+  const st = status(s), c = checks(s), [h, hc] = headline(s);
+  const pill = {ok:["done","Covered"], soon:["sent","Expiring soon"], bad:["late","Not covered"]}[st];
+  const jobs = projects.filter(p => p.subs.includes(s.id));
+  bar(null, "Subcontractor", {label:"Done", fn:() => closeSheet()});
+  $("sheetBody").innerHTML = `<div class="hero"><h2>${esc(s.name)}</h2><p>${s.trade} · ${esc(s.carrier)}</p><div style="margin-top:6px"><span class="pill ${pill[0]}">${pill[1]}</span></div></div>
+    <p class="section-h">Insurance on file</p>
+    <div class="list plain">${c.map(x => `<div class="cell"><span class="${IC[x.st]}">${ICON[x.st]}</span><span style="min-width:0"><div class="t">${Object.fromEntries(POL)[x.k]}</div><div class="s ${x.st==="bad"?"c-red":x.st==="soon"?"c-amber":""}" style="white-space:normal">${esc(x.why)}</div></span><span></span></div>`).join("")}</div>
+    <p class="section-h">On your jobs</p>
+    <div class="list plain">${jobs.map(p => `<div class="cell"><span></span><span style="min-width:0"><div class="t">${esc(p.name)}</div><div class="s">${p.week.includes(s.id) ? "Scheduled on site this week" : "Not scheduled this week"}</div></span><span></span></div>`).join("")}</div>
+    <div class="actions">
+      ${st!=="ok" && !s.requested ? `<button class="btn fill" id="reqBtn">Request New Certificate</button>` : ""}
+      ${st!=="ok" && s.requested ? `<button class="btn fill" id="revBtn">Review New Certificate</button>` : ""}
+      ${st==="ok" ? `<p class="section-f" style="margin:0 4px;text-align:center">All set. We'll remind ${esc(s.name)} 30 days before anything expires.</p>` : ""}
+    </div>
+    <p class="section-f">${st==="bad" ? (s.requested ? "Request sent. In the demo, tap Review to see what you'd get when they upload it." : "Keep them off your sites until a valid certificate is on file. One tap sends them a link to upload it.") : st==="soon" ? (s.requested ? "Request sent. Tap Review to see their upload." : `${esc(h)}. Asking now avoids a gap in coverage.`) : ""}</p>`;
+  const r = $("reqBtn"); if(r) r.onclick = () => { ctx = {mode:"request", id:s.id}; swap(renderSheet); };
+  const v = $("revBtn"); if(v) v.onclick = () => { ctx = {mode:"review", id:s.id}; swap(renderSheet); };
+}
+function renderRequest(s){
+  const issues = checks(s).filter(x => x.st!=="ok"), label = Object.fromEntries(POL);
+  const what = issues.map(x => label[x.k].toLowerCase() + (x.st==="soon" ? " (expiring)" : "")).join(" and ");
+  bar({label:"Cancel", fn:() => { ctx = {mode:"sub", id:s.id}; swap(renderSheet); }}, "Request", {label:"Send", fn:() => {
+    s.requested = true; ctx = {mode:"sub", id:s.id}; renderSubs(); renderProjects(); renderJob(); swap(renderSheet);
+    showBanner("Request ready", `To ${s.name}. In the full app this goes out by text and email.`);
+  }});
+  $("sheetBody").innerHTML = `<div class="hero"><h2>Ask for a new certificate</h2><p>Sent by text and email. They upload a photo or PDF; no account needed.</p></div>
+    <div class="bubble"><div class="to">To: ${esc(s.name)} · ${esc(s.contact)}</div>
+      Hi, this is Sample Builders. We need an updated certificate of insurance before your next day on our sites: ${esc(what)}. Please have your agent list Sample Builders as additional insured.<br><br>Upload it here: <a>[your secure upload link]</a></div>
+    <p class="section-f">If they don't upload within 3 days, CoverCheck sends one polite reminder. You can also forward the request to their insurance agent.</p>`;
+}
+function renderReview(s){
+  const fixed = {gl:{exp:365, occ:Math.max(s.gl ? s.gl.occ : 0, REQ.glOcc), agg:Math.max(s.gl ? s.gl.agg : 0, REQ.glAgg)}, wc:{exp:365}, auto:{exp:365}, ai:true};
+  const label = Object.fromEntries(POL);
+  const rows = [["gl", `${money(fixed.gl.occ)} / ${money(fixed.gl.agg)} · to ${dayLabel(365)}`],["wc",`Statutory · to ${dayLabel(365)}`],["auto",`${money(REQ.auto)} · to ${dayLabel(365)}`],["ai","Sample Builders listed"]];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 248"><rect width="340" height="248" fill="#fdfdfb"/><rect x="12" y="12" width="316" height="22" fill="#20252c"/><text x="20" y="27" font-family="Arial" font-size="10.5" font-weight="700" fill="#fff">CERTIFICATE OF LIABILITY INSURANCE · SAMPLE</text><text x="20" y="50" font-family="Arial" font-size="8" fill="#5d6670">INSURED</text><text x="20" y="62" font-family="Arial" font-size="10" font-weight="700" fill="#20252c">${esc(s.name.toUpperCase())}</text><text x="190" y="50" font-family="Arial" font-size="8" fill="#5d6670">INSURER</text><text x="190" y="62" font-family="Arial" font-size="9" fill="#20252c">${esc(s.carrier.replace(" (sample)",""))}</text>${["GENERAL LIABILITY","WORKERS COMP","AUTOMOBILE"].map((t,i)=>`<rect x="12" y="${76+i*34}" width="316" height="30" fill="none" stroke="#c9cdd2"/><text x="20" y="${95+i*34}" font-family="Arial" font-size="9" font-weight="700" fill="#20252c">${t}</text><text x="150" y="${95+i*34}" font-family="monospace" font-size="9" fill="#20252c">11/02/2026 – 11/02/2027</text><text x="290" y="${95+i*34}" font-family="Arial" font-size="9" fill="#20252c">${i===1?"STAT":"$1M"}</text>`).join("")}<text x="20" y="196" font-family="Arial" font-size="8" fill="#5d6670">CERTIFICATE HOLDER · ADDITIONAL INSURED</text><text x="20" y="209" font-family="Arial" font-size="10" fill="#20252c">Sample Builders LLC</text><path d="M210 222c12-16 20 6 32-6s16 8 30-4" stroke="#1a3c8f" stroke-width="1.6" fill="none"/><text x="210" y="238" font-family="Arial" font-size="7.5" fill="#5d6670">AUTHORIZED REPRESENTATIVE</text></svg>`;
+  bar({label:"Back", fn:() => { ctx = {mode:"sub", id:s.id}; swap(renderSheet); }}, "Review", {label:"Approve", fn:() => {
+    Object.assign(s, fixed); s.requested = false; closeSheet(); renderSubs(); renderProjects(); renderJob();
+    try{ navigator.vibrate && navigator.vibrate(12); }catch(e){}
+    showBanner("Cleared to work", `${s.name} is covered through ${dayLabel(365)}`);
+  }});
+  $("sheetBody").innerHTML = `<div class="hero"><h2>New certificate</h2><p>Uploaded by ${esc(s.name)} · just now (sample)</p></div>
+    <img class="cert" alt="Uploaded certificate of insurance (sample)" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}">
+    <p class="section-h">What CoverCheck read · checked against your requirements</p>
+    <div class="list plain">${rows.map(([k,t]) => `<div class="cell"><span class="ok-ic">${ICON.ok}</span><span style="min-width:0"><div class="t">${label[k]}</div><div class="s" style="white-space:normal">${t}</div></span><span></span></div>`).join("")}</div>
+    <p class="section-f">Everything meets your limits. Approve to clear them for all jobs, or go back if something looks wrong on the form.</p>`;
+}
+
+/* ---------- banner ---------- */
+let bTimer;
+const bannerY = springValue(y => $("banner").style.transform = `translateY(${y}px)`, -160);
+function showBanner(title, text){
+  $("bTitle").textContent = title; $("bText").textContent = text; clearTimeout(bTimer);
+  bannerY.to(0, {damping:.86, response:.42});
+  bTimer = setTimeout(() => bannerY.to(-160, {damping:1, response:.36}), 2800);
+}
+
+renderSubs(); renderProjects();
+})();
+</script>
+</body>
+</html>
